@@ -27,7 +27,7 @@ def curve():
 
 
 def main():
-    time_step = 1. / 10000.
+    time_step = 1. / 1000.
     gym_config = SimulationParameters(time_step=time_step)
     robot_class = QuadrupedRobot
     onRack = False
