@@ -1,0 +1,1003 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- This URDF was automatically created by SolidWorks to URDF Exporter! Originally created by Stephen Brawner (brawner@gmail.com) 
+     Commit Version: 1.5.1-0-g916b5db  Build Version: 1.5.7152.31018
+     For more information, please see http://wiki.ros.org/sw_urdf_exporter -->
+<robot
+  name="mit_mini_cheetah">
+  <link
+    name="body">
+    <inertial>
+      <origin
+        xyz="-0.00949304 0 -0.007428824"
+        rpy="0 0 0" />
+      <mass
+        value="5.42137" />
+      <inertia
+        ixx="0.015659"
+        ixy="0"
+        ixz="0.000973"
+        iyy="0.0447046"
+        iyz="0"
+        izz="0.0531832" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="meshes/body.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.79216 0.81961 0.93333 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="meshes/body_rebuild.obj" />
+      </geometry>
+    </collision>
+  </link>
+  <link
+    name="abduct_fl">
+    <inertial>
+      <origin
+        xyz="-0.0024349 -0.00060384 2.8097E-05"
+        rpy="0 0 0" />
+      <mass
+        value="0.532" />
+      <inertia
+        ixx="0.00033168"
+        ixy="-5.811E-06"
+        ixz="5.93E-07"
+        iyy="0.00053532"
+        iyz="-2.8E-07"
+        izz="0.00037553" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="meshes/abduct_fl.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.79216 0.81961 0.93333 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="meshes/hip_module_fl.obj" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="torso_to_abduct_fl_j"
+    type="revolute">
+    <origin
+      xyz="0.196 0.05 0"
+      rpy="0 0 0" />
+    <parent
+      link="body" />
+    <child
+      link="abduct_fl" />
+    <axis
+      xyz="1 0 0" />
+    <limit
+      lower="-6.28"
+      upper="6.28"
+      effort="30"
+      velocity="24" />
+    <joint_properties damping=".0" friction=".0"/>
+  </joint>
+  <link
+    name="thigh_fl">
+    <inertial>
+      <origin
+        xyz="0.00013591 -0.024874 -0.0075354"
+        rpy="0 0 0" />
+      <mass
+        value="0.67586" />
+      <inertia
+        ixx="0.0010561"
+        ixy="2.23E-06"
+        ixz="-1.358E-07"
+        iyy="0.001148641"
+        iyz="-0.00012713"
+        izz="0.00048521" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="meshes/thigh_fl.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.79216 0.81961 0.93333 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="meshes/thigh_module_rebuild_fl.obj" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="abduct_fl_to_thigh_fl_j"
+    type="revolute">
+    <origin
+      xyz="0 0.07575 0"
+      rpy="0 0 0" />
+    <parent
+      link="abduct_fl" />
+    <child
+      link="thigh_fl" />
+    <axis
+      xyz="0 -1 0" />
+    <limit
+      lower="-6.28"
+      upper="6.28"
+      effort="30"
+      velocity="24" />
+    <joint_properties damping=".0" friction=".0"/>
+  </joint>
+  <link
+    name="shank_fl">
+    <inertial>
+      <origin
+        xyz="0 0 0.037888"
+        rpy="0 0 0" />
+      <mass
+        value="0.09264" />
+      <inertia
+        ixx="0.00029147"
+        ixy="0"
+        ixz="0"
+        iyy="0.00029711"
+        iyz="0"
+        izz="1.0337E-05" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="meshes/shank_module_short_fl.obj" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.79216 0.81961 0.93333 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="meshes/shank_module_short_fl.obj" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="thigh_fl_to_knee_fl_j"
+    type="revolute">
+    <origin
+      xyz="0 0 -0.2115"
+      rpy="0 0 0" />
+    <parent
+      link="thigh_fl" />
+    <child
+      link="shank_fl" />
+    <axis
+      xyz="0 -1 0" />
+    <limit
+      lower="-1.57"
+      upper="1.57"
+      effort="30"
+      velocity="24" />
+    <joint_properties damping=".0" friction=".0"/>
+  </joint>
+  <link
+    name="toe_fl">
+    <contact>
+      <friction_anchor/>
+      <stiffness value="30000.0"/>
+      <damping value="1000.0"/>
+      <spinning_friction value="0.1"/>
+      <lateral_friction value="10.0"/>
+    </contact>
+    <inertial>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <mass
+        value="0.1" />
+      <inertia
+        ixx="0.000025"
+        ixy="0"
+        ixz="0"
+        iyy="0.000025"
+        iyz="0"
+        izz="0.000025" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="meshes/toe_fl.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.29804 0.29804 0.29804 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <sphere radius="0.025"/>
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="toe_fl_joint"
+    type="fixed">
+    <origin
+      xyz="0 0 -0.204.77"
+      rpy="0 0 0" />
+    <parent
+      link="shank_fl" />
+    <child
+      link="toe_fl" />
+    <axis
+      xyz="0 0 0" />
+    <dynamics
+      damping="0"
+      friction="0" />
+  </joint>
+  <link
+    name="abduct_fr">
+    <inertial>
+      <origin
+        xyz="-0.0024349 0.0006038 -2.81E-05"
+        rpy="0 0 0" />
+      <mass
+        value="0.532" />
+      <inertia
+        ixx="0.00033168"
+        ixy="5.811E-06"
+        ixz="-5.93E-07"
+        iyy="0.00053532"
+        iyz="-2.8E-07"
+        izz="0.00037553" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="meshes/abduct_fr.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.79216 0.81961 0.93333 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="meshes/hip_module_fr.obj" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="torso_to_abduct_fr_j"
+    type="revolute">
+    <origin
+      xyz="0.196 -0.05 0"
+      rpy="0 0 0" />
+    <parent
+      link="body" />
+    <child
+      link="abduct_fr" />
+    <axis
+      xyz="1 0 0" />
+    <limit
+      lower="-6.28"
+      upper="6.28"
+      effort="30"
+      velocity="24" />
+    <joint_properties damping=".0" friction=".0"/>
+  </joint>
+  <link
+    name="thigh_fr">
+    <inertial>
+      <origin
+        xyz="0.000136 0.024874 -0.007535"
+        rpy="0 0 0" />
+      <mass
+        value="0.67586" />
+      <inertia
+        ixx="0.0010561"
+        ixy="2.23E-06"
+        ixz="1.358E-07"
+        iyy="0.0011486"
+        iyz="0.00012713"
+        izz="0.00048521" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="meshes/thigh_fr.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.79216 0.81961 0.93333 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="meshes/thigh_module_rebuild_fr.obj" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="abduct_fr_to_thigh_fr_j"
+    type="revolute">
+    <origin
+      xyz="0 -0.07575 0"
+      rpy="0 0 0" />
+    <parent
+      link="abduct_fr" />
+    <child
+      link="thigh_fr" />
+    <axis
+      xyz="0 -1 0" />
+    <limit
+      lower="-6.28"
+      upper="6.28"
+      effort="30"
+      velocity="24" />
+    <joint_properties damping=".0" friction=".0"/>
+  </joint>
+  <link
+    name="shank_fr">
+    <inertial>
+      <origin
+        xyz="0 0 0.037888"
+        rpy="0 0 0" />
+      <mass
+        value="0.09264" />
+      <inertia
+        ixx="0.00029147"
+        ixy="0"
+        ixz="0"
+        iyy="0.00029711"
+        iyz="0"
+        izz="1.0337E-05" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="meshes/shank_module_short_fr.obj" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.79216 0.81961 0.93333 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="meshes/shank_module_short_fr.obj" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="thigh_fr_to_knee_fr_j"
+    type="revolute">
+    <origin
+      xyz="0 0 -0.2115"
+      rpy="0 0 0" />
+    <parent
+      link="thigh_fr" />
+    <child
+      link="shank_fr" />
+    <axis
+      xyz="0 -1 0" />
+    <limit
+      lower="-1.57"
+      upper="1.57"
+      effort="30"
+      velocity="24" />
+    <joint_properties damping=".0" friction=".0"/>
+  </joint>
+  <link
+    name="toe_fr">
+    <contact>
+      <friction_anchor/>
+      <stiffness value="30000.0"/>
+      <damping value="1000.0"/>
+      <spinning_friction value="0.1"/>
+      <lateral_friction value="10.0"/>
+    </contact>
+    <inertial>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <mass
+        value="0.1" />
+      <inertia
+        ixx="0.000025"
+        ixy="0"
+        ixz="0"
+        iyy="0.000025"
+        iyz="0"
+        izz="0.000025" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="meshes/toe_fr.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.29804 0.29804 0.29804 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <sphere radius="0.025"/>
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="toe_fr_joint"
+    type="fixed">
+    <origin
+      xyz="0 0 -0.20477"
+      rpy="0 0 0" />
+    <parent
+      link="shank_fr" />
+    <child
+      link="toe_fr" />
+    <axis
+      xyz="0 0 0" />
+    <dynamics
+      damping="0"
+      friction="0" />
+  </joint>
+  <link
+    name="abduct_hl">
+    <inertial>
+      <origin
+        xyz="0.0024349 -0.0006038 -2.81E-05"
+        rpy="0 0 0" />
+      <mass
+        value="0.532" />
+      <inertia
+        ixx="0.00033168"
+        ixy="5.811E-06"
+        ixz="5.93E-07"
+        iyy="0.00053532"
+        iyz="2.8E-07"
+        izz="0.00037553" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="meshes/abduct_hl.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.79216 0.81961 0.93333 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="meshes/hip_module_hl.obj" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="torso_to_abduct_hl_j"
+    type="revolute">
+    <origin
+      xyz="-0.196 0.05 0"
+      rpy="0 0 0" />
+    <parent
+      link="body" />
+    <child
+      link="abduct_hl" />
+    <axis
+      xyz="1 0 0" />
+    <limit
+      lower="-6.28"
+      upper="6.28"
+      effort="30"
+      velocity="24" />
+    <joint_properties damping=".0" friction=".0"/>
+  </joint>
+  <link
+    name="thigh_hl">
+    <inertial>
+      <origin
+        xyz="-0.000136 -0.024874 -0.007535"
+        rpy="0 0 0" />
+      <mass
+        value="0.67586" />
+      <inertia
+        ixx="0.0010561"
+        ixy="2.23E-06"
+        ixz="-1.358E-07"
+        iyy="0.0011486"
+        iyz="-0.00012713"
+        izz="0.00048521" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="meshes/thigh_hl.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.79216 0.81961 0.93333 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="meshes/thigh_module_rebuild_hl.obj" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="abduct_hl_to_thigh_hl_j"
+    type="revolute">
+    <origin
+      xyz="0 0.07575 0"
+      rpy="0 0 0" />
+    <parent
+      link="abduct_hl" />
+    <child
+      link="thigh_hl" />
+    <axis
+      xyz="0 -1 0" />
+    <limit
+      lower="-6.28"
+      upper="6.28"
+      effort="30"
+      velocity="24" />
+    <joint_properties damping=".0" friction=".0"/>
+  </joint>
+  <link
+    name="shank_hl">
+    <inertial>
+      <origin
+        xyz="0 0 -0.037888"
+        rpy="0 0 0" />
+      <mass
+        value="0.09264" />
+      <inertia
+        ixx="0.00029147"
+        ixy="0"
+        ixz="0"
+        iyy="0.00029711"
+        iyz="0"
+        izz="1.0337E-05" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="meshes/shank_module_short_hl.obj" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.79216 0.81961 0.93333 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="meshes/shank_module_short_hl.obj" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="thigh_hl_to_knee_hl_j"
+    type="revolute">
+    <origin
+      xyz="0 0 -0.2115"
+      rpy="0 0 0" />
+    <parent
+      link="thigh_hl" />
+    <child
+      link="shank_hl" />
+    <axis
+      xyz="0 -1 0" />
+    <limit
+      lower="-1.57"
+      upper="1.57"
+      effort="30"
+      velocity="24" />
+    <joint_properties damping=".0" friction=".0"/>
+  </joint>
+  <link
+    name="toe_hl">
+    <contact>
+      <friction_anchor/>
+      <stiffness value="30000.0"/>
+      <damping value="1000.0"/>
+      <spinning_friction value="0.1"/>
+      <lateral_friction value="10.0"/>
+    </contact>
+    <inertial>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <mass
+        value="0.1" />
+      <inertia
+        ixx="0.000025"
+        ixy="0"
+        ixz="0"
+        iyy="0.000025"
+        iyz="0"
+        izz="0.000025" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="meshes/toe_hl.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.29804 0.29804 0.29804 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <sphere radius="0.025"/>
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="toe_hl_joint"
+    type="fixed">
+    <origin
+      xyz="0 0 -0.20477"
+      rpy="0 0 0" />
+    <parent
+      link="shank_hl" />
+    <child
+      link="toe_hl" />
+    <axis
+      xyz="0 0 0" />
+    <dynamics
+      damping="0"
+      friction="0" />
+  </joint>
+  <link
+    name="abduct_hr">
+    <inertial>
+      <origin
+        xyz="0.0024349 0.00060384 2.8097E-05"
+        rpy="0 0 0" />
+      <mass
+        value="0.532" />
+      <inertia
+        ixx="0.00033168"
+        ixy="-5.811E-06"
+        ixz="-5.93E-07"
+        iyy="0.00053532"
+        iyz="2.8E-07"
+        izz="0.00037553" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="meshes/abduct_hr.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.79216 0.81961 0.93333 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="meshes/hip_module_hr.obj" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="torso_to_abduct_hr_j"
+    type="revolute">
+    <origin
+      xyz="-0.196 -0.05 0"
+      rpy="0 0 0" />
+    <parent
+      link="body" />
+    <child
+      link="abduct_hr" />
+    <axis
+      xyz="1 0 0" />
+    <limit
+      lower="-6.28"
+      upper="6.28"
+      effort="30"
+      velocity="24" />
+    <joint_properties damping=".0" friction=".0"/>
+  </joint>
+  <link
+    name="thigh_hr">
+    <inertial>
+      <origin
+        xyz="0.0002627 0.024874 -0.0075354"
+        rpy="0 0 0" />
+      <mass
+        value="0.67586" />
+      <inertia
+        ixx="0.0010561"
+        ixy="2.23E-06"
+        ixz="1.358E-07"
+        iyy="0.0011486"
+        iyz="0.00012713"
+        izz="0.00048521" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="meshes/thigh_hr.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.79216 0.81961 0.93333 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="meshes/thigh_module_rebuild_hr.obj" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="abduct_hr_to_thigh_hr_j"
+    type="revolute">
+    <origin
+      xyz="0 -0.07575 0"
+      rpy="0 0 0" />
+    <parent
+      link="abduct_hr" />
+    <child
+      link="thigh_hr" />
+    <axis
+      xyz="0 -1 0" />
+    <limit
+      lower="-6.28"
+      upper="6.28"
+      effort="30"
+      velocity="24" />
+    <joint_properties damping=".0" friction=".0"/>
+  </joint>
+  <link
+    name="shank_hr">
+    <inertial>
+      <origin
+        xyz="0 0 -0.037888"
+        rpy="0 0 0" />
+      <mass
+        value="0.09264" />
+      <inertia
+        ixx="0.00029147"
+        ixy="0"
+        ixz="0"
+        iyy="0.00029711"
+        iyz="0"
+        izz="1.0337E-05" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="meshes/shank_module_short_hr.obj" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.79216 0.81961 0.93333 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="meshes/shank_module_short_hr.obj" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="thigh_hr_to_knee_hr_j"
+    type="revolute">
+    <origin
+      xyz="0 0 -0.2115"
+      rpy="0 0 0" />
+    <parent
+      link="thigh_hr" />
+    <child
+      link="shank_hr" />
+    <axis
+      xyz="0 -1 0" />
+    <limit
+      lower="-1.57"
+      upper="1.57"
+      effort="30"
+      velocity="24" />
+    <joint_properties damping=".0" friction=".0"/>
+  </joint>
+  <link
+    name="toe_hr">
+    <contact>
+      <friction_anchor/>
+      <stiffness value="30000.0"/>
+      <damping value="1000.0"/>
+      <spinning_friction value="0.1"/>
+      <lateral_friction value="10.0"/>
+    </contact>
+    <inertial>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <mass
+        value="0.1" />
+      <inertia
+        ixx="0.000025"
+        ixy="0"
+        ixz="0"
+        iyy="0.000025"
+        iyz="0"
+        izz="0.000025" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="meshes/toe_hr.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.29804 0.29804 0.29804 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <sphere radius="0.025"/>
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="toe_hr_joint"
+    type="fixed">
+    <origin
+      xyz="0 0 -0.20477"
+      rpy="0 0 0" />
+    <parent
+      link="shank_hr" />
+    <child
+      link="toe_hr" />
+    <axis
+      xyz="0 0 0" />
+    <dynamics
+      damping="0"
+      friction="0" />
+  </joint>
+</robot>
