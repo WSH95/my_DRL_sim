@@ -10,13 +10,16 @@ from envs.locomotion_gym_config import SimulationParameters
 from robots.legged_robots.robot_config import MotorControlMode, RobotSimParams
 from envs.set_gui_sliders import set_gui_sliders
 import time
+from tasks.base_task import BaseTask
+from sensors.sensor_wrappers import SensorWrapper
 
 
 class LocomotionGymEnv(gym.Env):
     def __init__(self,
                  gym_config: SimulationParameters,
                  robot_class=None,
-                 robot_params: RobotSimParams = None):
+                 robot_params: RobotSimParams = None,
+                 task: BaseTask = None):
         self.seed()
         self._gym_config = gym_config
         if robot_class is None:
@@ -27,6 +30,10 @@ class LocomotionGymEnv(gym.Env):
         self._world_dict = {}
 
         self._robot_params = robot_params
+
+        self._task = task
+
+        self._obs_sensor = None
 
         self._time_step = self._gym_config.time_step
 
@@ -47,6 +54,7 @@ class LocomotionGymEnv(gym.Env):
             self._eglPlugin = self._pybullet_client.loadPlugin(egl.get_filename(), "_eglRendererPlugin")
 
         self._build_action_space()
+        self._build_observation_space()
 
         # Set the default render options.
         self._camera_dist = self._gym_config.camera_distance
@@ -83,6 +91,15 @@ class LocomotionGymEnv(gym.Env):
                                            np.array(action_upper_bound),
                                            dtype=np.float32)
 
+    def _build_observation_space(self):
+        if self._task is None:
+            raise ValueError("The task cannot be None!")
+        else:
+            self._obs_sensor = SensorWrapper(self._task.get_observation_sensors())
+        self.observation_space = spaces.Box(self._obs_sensor.get_lower_bound(),
+                                            self._obs_sensor.get_upper_bound(),
+                                            dtype=np.float32)
+
     def seed(self, seed=None):
         self.np_random, self.np_random_seed = seeding.np_random(seed)
         return [self.np_random_seed]
@@ -110,6 +127,8 @@ class LocomotionGymEnv(gym.Env):
             # Rebuild the robot
             self._robot = self._robot_class(self._pybullet_client, self._robot_params, time_step=self._time_step)
 
+            self._obs_sensor.set_robot(self._robot)
+
         # Reset the pose of the robot.
         # self._robot.Reset(reload_urdf=False, default_motor_angles=start_motor_angles, reset_time=reset_duration)
 
@@ -122,7 +141,10 @@ class LocomotionGymEnv(gym.Env):
         if self._is_render:
             self._pybullet_client.configureDebugVisualizer(p.COV_ENABLE_RENDERING, 1)
         self._robot.Reset(reload_urdf=False, default_motor_angles=start_motor_angles, reset_time=reset_duration)
+        self._obs_sensor.on_reset()
         self._num_env_act = 0
+
+        return self._get_observation()
 
     def step(self, action):
         if self._is_render:
@@ -138,7 +160,11 @@ class LocomotionGymEnv(gym.Env):
 
         self._robot.Step(action, None)
 
+        self._obs_sensor.on_step()
+
         self._num_env_act += 1
+
+        return self._get_observation(), self._task.reward(), self._task.done(), {}
 
     def render(self, mode='rgb_array'):
         if mode != 'rgb_array':
@@ -182,3 +208,6 @@ class LocomotionGymEnv(gym.Env):
 
     def set_gui_sliders(self):
         set_gui_sliders(self._pybullet_client)
+
+    def _get_observation(self):
+        return self._obs_sensor.get_observation()
