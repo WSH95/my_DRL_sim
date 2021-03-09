@@ -39,9 +39,9 @@ class TestLeg:
         self.action.torque_estimate = None  # [0] * 12
         self.action.velocity_desired = [0] * ((self._baseDof if self.action.torque_estimate is None else 0) + 12)
         if self._on_rack or self.action.torque_estimate is not None:
-            self.action.position_desired = [0, -1 * theta1, -1 * theta2] * 4
+            self.action.position_desired = [0, 1 * theta1, 1 * theta2] * 4
         else:
-            self.action.position_desired = [None, None, H + 0.025, 0, 0, 0, 1] + [0, -1 * theta1, -1 * theta2] * 4
+            self.action.position_desired = [None, None, H + 0.025, 0, 0, 0, 1] + [0, 1 * theta1, 1 * theta2] * 4
         # kp = self._pybullet_client.readUserDebugParameter(self._kp_ID) * 2000
         # kd = self._pybullet_client.readUserDebugParameter(self._kd_ID) * 50
         kp = global_values.global_userDebugParams.readValue("kp", 0.353) * 2000

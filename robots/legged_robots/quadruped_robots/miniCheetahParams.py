@@ -117,3 +117,7 @@ class MiniCheetahParams(RobotSimParams):
         self.sim_names.link_names = LINK_NAMES
         self.sim_names.link_leg_names = LINK_LEG_NAMES
         self.sim_names.link_foot_names = LINK_FOOT_NAMES
+
+        self.reset_at_current_pose = False
+        self.control_latency = 0.0
+        self.pd_latency = 0.0

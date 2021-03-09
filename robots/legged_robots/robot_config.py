@@ -93,6 +93,9 @@ class RobotSimParams(object):
     motor_kp = attr.ib(type=Union[float, Sequence, np.ndarray], default=None)
     motor_kd = attr.ib(type=Union[float, Sequence, np.ndarray], default=None)
     sim_names = attr.ib(type=RobotSimNames, default=None)
+    reset_at_current_pose = attr.ib(type=bool, default=False)
+    control_latency = attr.ib(type=float, default=0.0)
+    pd_latency = attr.ib(type=float, default=0.0)
 
 
 @attr.s
@@ -105,5 +108,10 @@ class RobotRawObservation(object):
     baseRollPitchYaw_world = attr.ib(type=List[float], default=[0, 0, 0])
     baseLinearVelocity_world = attr.ib(type=List[float], default=[0, 0, 0])
     baseAngularVelocity_world = attr.ib(type=List[float], default=[0, 0, 0])
-    baseLinearVelocity_local = attr.ib(type=List[float], default=[0, 0, 0])
-    baseAngularVelocity_local = attr.ib(type=List[float], default=[0, 0, 0])
+    baseLinearVelocity_body = attr.ib(type=List[float], default=[0, 0, 0])
+    baseAngularVelocity_body = attr.ib(type=List[float], default=[0, 0, 0])
+    baseOrientation_init = attr.ib(type=List[float], default=[0, 0, 0, 1])
+    baseRollPitchYaw_init = attr.ib(type=List[float], default=[0, 0, 0])
+    # baseRollPitchYaw_local = attr.ib(type=List[float], default=[0, 0, 0])
+    # baseLinearVelocity_local = attr.ib(type=List[float], default=[0, 0, 0])
+    # baseAngularVelocity_local = attr.ib(type=List[float], default=[0, 0, 0])

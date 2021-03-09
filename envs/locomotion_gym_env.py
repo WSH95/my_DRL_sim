@@ -1,4 +1,3 @@
-from abc import ABC
 import numpy as np
 import gym
 from gym import spaces
@@ -13,7 +12,7 @@ from envs.set_gui_sliders import set_gui_sliders
 import time
 
 
-class LocomotionGymEnv(gym.Env, ABC):
+class LocomotionGymEnv(gym.Env):
     def __init__(self,
                  gym_config: SimulationParameters,
                  robot_class=None,
@@ -62,7 +61,7 @@ class LocomotionGymEnv(gym.Env, ABC):
 
         self.set_gui_sliders()
 
-        self.reset(start_motor_angles=None, reset_duration=0.0)
+        self.reset(start_motor_angles=None, reset_duration=1.0)
 
         self._hard_reset = self._gym_config.enable_hard_reset
 
