@@ -14,3 +14,4 @@ class SimulationParameters(object):
     enable_hard_reset = attr.ib(type=bool, default=False)
     reset_time = attr.ib(type=float, default=-1)
     time_step = attr.ib(type=float, default=1.0 / 240.0)
+    train_or_test = attr.ib(type=str, default="train")

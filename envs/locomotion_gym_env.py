@@ -12,6 +12,7 @@ from envs.set_gui_sliders import set_gui_sliders
 import time
 from tasks.base_task import BaseTask
 from sensors.sensor_wrappers import SensorWrapper
+from tasks.contact_fall_for_legged_robot import is_contact_fall
 
 
 class LocomotionGymEnv(gym.Env):
@@ -69,6 +70,7 @@ class LocomotionGymEnv(gym.Env):
 
         self.set_gui_sliders()
 
+        self._task.reset(self)
         self.reset(start_motor_angles=None, reset_duration=1.0)
 
         self._hard_reset = self._gym_config.enable_hard_reset
@@ -79,21 +81,42 @@ class LocomotionGymEnv(gym.Env):
 
     def _build_action_space(self):
         motor_mode = self._robot_params.motor_control_mode
-        if motor_mode == MotorControlMode.POSITION:
-            action_upper_bound = []
-            action_lower_bound = []
-            action_config = self._robot_params.JOINT_ANGLE_LIMIT
-            for action in action_config:
-                action_upper_bound.append(action.upper_bound)
-                action_lower_bound.append(action.lower_bound)
+        action_upper_bound = []
+        action_lower_bound = []
 
-            self.action_space = spaces.Box(np.array(action_lower_bound),
-                                           np.array(action_upper_bound),
-                                           dtype=np.float32)
+        if (motor_mode == MotorControlMode.POSITION) or (motor_mode == MotorControlMode.HYBRID_COMPUTED_POS):
+            action_lower_bound.extend(self._robot_params.joint_angle_MinMax[0])
+            action_upper_bound.extend(self._robot_params.joint_angle_MinMax[1])
+            # action_config = self._robot_params.JOINT_ANGLE_LIMIT
+            # for action in action_config:
+            #     action_upper_bound.append(action.upper_bound)
+            #     action_lower_bound.append(action.lower_bound)
+
+        elif motor_mode == MotorControlMode.TORQUE:
+            action_lower_bound.extend(self._robot_params.joint_torque_MinMax[0])
+            action_upper_bound.extend(self._robot_params.joint_torque_MinMax[1])
+            # action_config = self._robot_params.JOINT_TORQUE_LIMIT
+            # for action in action_config:
+            #     action_upper_bound.append(action.upper_bound)
+            #     action_lower_bound.append(action.lower_bound)
+
+        elif motor_mode == MotorControlMode.HYBRID_COMPUTED_POS_VEL:
+            action_lower_bound.extend(self._robot_params.joint_angle_MinMax[0])
+            action_lower_bound.extend(self._robot_params.joint_velocity_MinMax[0])
+            action_upper_bound.extend(self._robot_params.joint_angle_MinMax[1])
+            action_upper_bound.extend(self._robot_params.joint_velocity_MinMax[1])
+            # for action_config in [self._robot_params.JOINT_ANGLE_LIMIT, self._robot_params.JOINT_VELOCITY_LIMIT]:
+            #     for action in action_config:
+            #         action_upper_bound.append(action.upper_bound)
+            #         action_lower_bound.append(action.lower_bound)
+
+        self.action_space = spaces.Box(np.array(action_lower_bound),
+                                       np.array(action_upper_bound),
+                                       dtype=np.float32)
 
     def _build_observation_space(self):
         if self._task is None:
-            raise ValueError("The task cannot be None!")
+            return
         else:
             self._obs_sensor = SensorWrapper(self._task.get_observation_sensors())
         self.observation_space = spaces.Box(self._obs_sensor.get_lower_bound(),
@@ -127,7 +150,8 @@ class LocomotionGymEnv(gym.Env):
             # Rebuild the robot
             self._robot = self._robot_class(self._pybullet_client, self._robot_params, time_step=self._time_step)
 
-            self._obs_sensor.set_robot(self._robot)
+            if self._obs_sensor is not None:
+                self._obs_sensor.set_robot(self._robot)
 
         # Reset the pose of the robot.
         # self._robot.Reset(reload_urdf=False, default_motor_angles=start_motor_angles, reset_time=reset_duration)
@@ -141,30 +165,34 @@ class LocomotionGymEnv(gym.Env):
         if self._is_render:
             self._pybullet_client.configureDebugVisualizer(p.COV_ENABLE_RENDERING, 1)
         self._robot.Reset(reload_urdf=False, default_motor_angles=start_motor_angles, reset_time=reset_duration)
-        self._obs_sensor.on_reset()
+        if self._obs_sensor is not None:
+            self._obs_sensor.on_reset()
+
         self._num_env_act = 0
 
         return self._get_observation()
 
     def step(self, action):
+        time_spent = time.time() - self._last_frame_time
+        self._last_frame_time = time.time()
+        # if self._num_env_act % 5 == 0:
+        #     print(f"time_spent: {time_spent * 1000} ms")
+
         if self._is_render:
             # Sleep, otherwise the computation takes less time than real time,
             # which will make the visualization like a fast-forward video.
-            time_spent = time.time() - self._last_frame_time
-            self._last_frame_time = time.time()
             time_to_sleep = self._time_step - time_spent
             if time_to_sleep > 0:
                 time.sleep(time_to_sleep)
-            if self._num_env_act % 100 == 0:
-                print(f"time_spent: {time_spent * 1000} ms")
 
         self._robot.Step(action, None)
 
-        self._obs_sensor.on_step()
+        if self._obs_sensor is not None:
+            self._obs_sensor.on_step()
 
         self._num_env_act += 1
 
-        return self._get_observation(), self._task.reward(), self._task.done(), {}
+        return self._get_observation(), self._get_reward(), self.done, {}
 
     def render(self, mode='rgb_array'):
         if mode != 'rgb_array':
@@ -199,8 +227,20 @@ class LocomotionGymEnv(gym.Env):
     def getRobotID(self):
         return self._robot.getRobotID()
 
+    @property
+    def robot(self):
+        return self._robot
+
+    @property
+    def ground(self):
+        return self._world_dict["ground"]
+
     def getClient(self):
         return self._pybullet_client
+
+    @property
+    def env_step_counter(self):
+        return self._num_env_act
 
     @property
     def baseHeight(self):
@@ -210,4 +250,27 @@ class LocomotionGymEnv(gym.Env):
         set_gui_sliders(self._pybullet_client)
 
     def _get_observation(self):
-        return self._obs_sensor.get_observation()
+        if self._obs_sensor is not None:
+            return self._obs_sensor.get_observation()
+        else:
+            return None
+
+    def _get_reward(self):
+        if self._task is not None:
+            return self._task.reward()
+        else:
+            return None
+
+    @property
+    def done(self) -> bool:
+        # if self._obs_sensor is not None:
+        #     if self._obs_sensor.on_terminate():
+        #         return True
+
+        if is_contact_fall(self):
+            return True
+
+        if self._task is not None:
+            return self._task.done()
+        else:
+            return False

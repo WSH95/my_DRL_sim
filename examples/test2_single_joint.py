@@ -10,6 +10,9 @@ class SingleJointParams(RobotSimParams):
                  time_step: float = 1.0 / 240.0,
                  motor_control_mode: MotorControlMode = MotorControlMode.POSITION):
         self.urdf_filepath = "/home/wsh/Documents/my_DRL_sim/urdf_files/single_joint_urdf/single_joint.urdf"
+        self.joint_angle_MinMax = [[-np.inf], [np.inf]]
+        self.joint_velocity_MinMax = [[-np.inf], [np.inf]]
+        self.joint_torque_MinMax = [[-np.inf], [np.inf]]
         self.num_motors = 1
         self.dofs_per_leg = 1
         self.on_rack = True
@@ -28,7 +31,13 @@ class SingleJointParams(RobotSimParams):
         self.sim_names.motor_names = ["joint0"]
         self.sim_names.link_names = ["rotary_link"]
         self.sim_names.link_leg_names = ["rotary_link"]
-        self.sim_names.link_foot_names = None
+        self.sim_names.link_single_leg_names = [["rotary_link"]]
+        self.sim_names.link_disable_collision_names = [["rotary_link"]]
+        self.sim_names.link_foot_names = []
+
+        self.reset_at_current_pose = False
+        self.control_latency = 0.0
+        self.pd_latency = 0.0
 
 
 def main():

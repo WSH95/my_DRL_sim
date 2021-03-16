@@ -22,6 +22,8 @@ LINK_LEG_NAMES = [
     "thigh_hl", "shank_hl",
     "thigh_hr", "shank_hr"]
 LINK_FOOT_NAMES = ["toe_fl", "toe_fr", "toe_hl", "toe_hr"]
+LINK_SINGLE_LEG_NAMES = [LINK_NAMES[:4], LINK_NAMES[4:8], LINK_NAMES[8:12], LINK_NAMES[12:]]
+LINK_DISABLE_COLLISION_NAMES = [["base"] + names for names in LINK_SINGLE_LEG_NAMES] + [["base"] + [name] for name in LINK_NAMES]
 
 MINI_CHEETAH_INIT_RACK_POSITION = [0, 0, 1]
 MINI_CHEETAH_INIT_POSITION = [0, 0, 0.281]
@@ -55,41 +57,119 @@ LOWER_BOUND = -2 * np.pi
 class MiniCheetahParams(RobotSimParams):
     JOINT_ANGLE_LIMIT = [
         ScalarField(name="motor_angle_0",
-                    upper_bound=UPPER_BOUND,
-                    lower_bound=LOWER_BOUND),
+                    upper_bound=2 * np.pi,
+                    lower_bound=-2 * np.pi),
         ScalarField(name="motor_angle_1",
-                    upper_bound=UPPER_BOUND,
-                    lower_bound=LOWER_BOUND),
+                    upper_bound=2 * np.pi,
+                    lower_bound=-2 * np.pi),
         ScalarField(name="motor_angle_2",
-                    upper_bound=UPPER_BOUND,
-                    lower_bound=LOWER_BOUND),
+                    upper_bound=2 * np.pi,
+                    lower_bound=-2 * np.pi),
         ScalarField(name="motor_angle_3",
-                    upper_bound=UPPER_BOUND,
-                    lower_bound=LOWER_BOUND),
+                    upper_bound=2 * np.pi,
+                    lower_bound=-2 * np.pi),
         ScalarField(name="motor_angle_4",
-                    upper_bound=UPPER_BOUND,
-                    lower_bound=LOWER_BOUND),
+                    upper_bound=2 * np.pi,
+                    lower_bound=-2 * np.pi),
         ScalarField(name="motor_angle_5",
-                    upper_bound=UPPER_BOUND,
-                    lower_bound=LOWER_BOUND),
+                    upper_bound=2 * np.pi,
+                    lower_bound=-2 * np.pi),
         ScalarField(name="motor_angle_6",
-                    upper_bound=UPPER_BOUND,
-                    lower_bound=LOWER_BOUND),
+                    upper_bound=2 * np.pi,
+                    lower_bound=-2 * np.pi),
         ScalarField(name="motor_angle_7",
-                    upper_bound=UPPER_BOUND,
-                    lower_bound=LOWER_BOUND),
+                    upper_bound=2 * np.pi,
+                    lower_bound=-2 * np.pi),
         ScalarField(name="motor_angle_8",
-                    upper_bound=UPPER_BOUND,
-                    lower_bound=LOWER_BOUND),
+                    upper_bound=2 * np.pi,
+                    lower_bound=-2 * np.pi),
         ScalarField(name="motor_angle_9",
-                    upper_bound=UPPER_BOUND,
-                    lower_bound=LOWER_BOUND),
+                    upper_bound=2 * np.pi,
+                    lower_bound=-2 * np.pi),
         ScalarField(name="motor_angle_10",
-                    upper_bound=UPPER_BOUND,
-                    lower_bound=LOWER_BOUND),
+                    upper_bound=2 * np.pi,
+                    lower_bound=-2 * np.pi),
         ScalarField(name="motor_angle_11",
-                    upper_bound=UPPER_BOUND,
-                    lower_bound=LOWER_BOUND)
+                    upper_bound=2 * np.pi,
+                    lower_bound=-2 * np.pi)
+    ]
+
+    JOINT_VELOCITY_LIMIT = [
+        ScalarField(name="motor_velocity_0",
+                    upper_bound=23.5,
+                    lower_bound=-23.5),
+        ScalarField(name="motor_velocity_1",
+                    upper_bound=23.5,
+                    lower_bound=-23.5),
+        ScalarField(name="motor_velocity_2",
+                    upper_bound=23.5,
+                    lower_bound=-23.5),
+        ScalarField(name="motor_velocity_3",
+                    upper_bound=23.5,
+                    lower_bound=-23.5),
+        ScalarField(name="motor_velocity_4",
+                    upper_bound=23.5,
+                    lower_bound=-23.5),
+        ScalarField(name="motor_velocity_5",
+                    upper_bound=23.5,
+                    lower_bound=-23.5),
+        ScalarField(name="motor_velocity_6",
+                    upper_bound=23.5,
+                    lower_bound=-23.5),
+        ScalarField(name="motor_velocity_7",
+                    upper_bound=23.5,
+                    lower_bound=-23.5),
+        ScalarField(name="motor_velocity_8",
+                    upper_bound=23.5,
+                    lower_bound=-23.5),
+        ScalarField(name="motor_velocity_9",
+                    upper_bound=23.5,
+                    lower_bound=-23.5),
+        ScalarField(name="motor_velocity_10",
+                    upper_bound=23.5,
+                    lower_bound=-23.5),
+        ScalarField(name="motor_velocity_11",
+                    upper_bound=23.5,
+                    lower_bound=-23.5)
+    ]
+
+    JOINT_TORQUE_LIMIT = [
+        ScalarField(name="motor_torque_0",
+                    upper_bound=35,
+                    lower_bound=-35),
+        ScalarField(name="motor_torque_1",
+                    upper_bound=35,
+                    lower_bound=-35),
+        ScalarField(name="motor_torque_2",
+                    upper_bound=35,
+                    lower_bound=-35),
+        ScalarField(name="motor_torque_3",
+                    upper_bound=35,
+                    lower_bound=-35),
+        ScalarField(name="motor_torque_4",
+                    upper_bound=35,
+                    lower_bound=-35),
+        ScalarField(name="motor_torque_5",
+                    upper_bound=35,
+                    lower_bound=-35),
+        ScalarField(name="motor_torque_6",
+                    upper_bound=35,
+                    lower_bound=-35),
+        ScalarField(name="motor_torque_7",
+                    upper_bound=35,
+                    lower_bound=-35),
+        ScalarField(name="motor_torque_8",
+                    upper_bound=35,
+                    lower_bound=-35),
+        ScalarField(name="motor_torque_9",
+                    upper_bound=35,
+                    lower_bound=-35),
+        ScalarField(name="motor_torque_10",
+                    upper_bound=35,
+                    lower_bound=-35),
+        ScalarField(name="motor_torque_11",
+                    upper_bound=35,
+                    lower_bound=-35)
     ]
 
     def __init__(self,
@@ -97,6 +177,13 @@ class MiniCheetahParams(RobotSimParams):
                  enable_self_collision: bool = True,
                  # time_step: float = 1.0 / 240.0,
                  motor_control_mode: MotorControlMode = MotorControlMode.POSITION):
+        self.joint_angle_MinMax = [[elem.lower_bound for elem in self.JOINT_ANGLE_LIMIT],
+                                   [elem.upper_bound for elem in self.JOINT_ANGLE_LIMIT]]
+        self.joint_velocity_MinMax = [[elem.lower_bound for elem in self.JOINT_VELOCITY_LIMIT],
+                                      [elem.upper_bound for elem in self.JOINT_VELOCITY_LIMIT]]
+        self.joint_torque_MinMax = [[elem.lower_bound for elem in self.JOINT_TORQUE_LIMIT],
+                                    [elem.upper_bound for elem in self.JOINT_TORQUE_LIMIT]]
+
         self.urdf_filepath = MINI_CHEETAH_URDF_FILE_PATH
         self.num_motors = MINI_CHEETAH_NUM_MOTORS
         self.dofs_per_leg = MINI_CHEETAH_DOFS_PER_LEG
@@ -117,6 +204,8 @@ class MiniCheetahParams(RobotSimParams):
         self.sim_names.link_names = LINK_NAMES
         self.sim_names.link_leg_names = LINK_LEG_NAMES
         self.sim_names.link_foot_names = LINK_FOOT_NAMES
+        self.sim_names.link_single_leg_names = LINK_SINGLE_LEG_NAMES
+        self.sim_names.link_disable_collision_names = LINK_DISABLE_COLLISION_NAMES
 
         self.reset_at_current_pose = False
         self.control_latency = 0.0

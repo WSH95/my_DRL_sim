@@ -33,8 +33,8 @@ class MotorControlMode(enum.Enum):
     # motor torque. This is the most flexible control mode.
     HYBRID = 3
 
-    # PWM mode is only availalbe for Minitaur
-    PWM = 4
+    HYBRID_COMPUTED_POS = 4
+    HYBRID_COMPUTED_POS_VEL = 5
 
 
 # Each hybrid action is a tuple (position, position_gain, velocity,
@@ -66,6 +66,8 @@ class RobotSimNames(object):
     link_names = attr.ib(type=List[Text], default=None)
     link_leg_names = attr.ib(type=List[Text], default=None)
     link_foot_names = attr.ib(type=List[Text], default=None)
+    link_single_leg_names = attr.ib(type=List[List[Text]], default=None)
+    link_disable_collision_names = attr.ib(type=List[List[Text]], default=None)
 
 
 @attr.s
@@ -78,7 +80,17 @@ class ScalarField(object):
 
 @attr.s
 class RobotSimParams(object):
-    JOINT_ANGLE_LIMIT = []
+    JOINT_ANGLE_LIMIT = attr.ib(type=List[ScalarField],
+                                default=[ScalarField(name="", upper_bound=np.inf, lower_bound=-np.inf)])
+    JOINT_VELOCITY_LIMIT = attr.ib(type=List[ScalarField],
+                                   default=[ScalarField(name="", upper_bound=np.inf, lower_bound=-np.inf)])
+    JOINT_TORQUE_LIMIT = attr.ib(type=List[ScalarField],
+                                 default=[ScalarField(name="", upper_bound=np.inf, lower_bound=-np.inf)])
+
+    joint_angle_MinMax = attr.ib(type=List[List[float]], default=[[-np.inf], [np.inf]])
+    joint_velocity_MinMax = attr.ib(type=List[List[float]], default=[[-np.inf], [np.inf]])
+    joint_torque_MinMax = attr.ib(type=List[List[float]], default=[[-np.inf], [np.inf]])
+
     urdf_filepath = attr.ib(type=Text, default=None)
     num_motors = attr.ib(type=int, default=1)
     dofs_per_leg = attr.ib(type=int, default=1)

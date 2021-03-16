@@ -20,6 +20,7 @@ class SensorWrapper(BaseSensor):
             dtype=np.float64)
 
     def set_robot(self, robot):
+        super(SensorWrapper, self).set_robot(robot)
         for sensor in self._wrapped_sensors:
             sensor.set_robot(robot)
 
@@ -92,6 +93,7 @@ class HistoricSensorWrapper(BaseSensor):
         return flatten_array
 
     def set_robot(self, robot):
+        super(HistoricSensorWrapper, self).set_robot(robot)
         for sensor in self._wrapped_sensors:
             sensor.set_robot(robot)
 

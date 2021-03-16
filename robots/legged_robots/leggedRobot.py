@@ -9,6 +9,7 @@ import numpy as np
 import time
 from utilities.pd_controller_stable_custom import PDControllerStable
 from sensors.basesensor import AddSensorNoise
+from utilities import global_values
 
 
 class LeggedRobot:
@@ -41,6 +42,8 @@ class LeggedRobot:
         self._chassis_link_id_list = [-1]
         self._leg_link_id_list = []
         self._foot_link_id_list = []
+        self._single_legs_id_list = []
+        self._disable_link_id_list = []
 
         self._robot_raw_obs = RobotRawObservation()
         self._robot_raw_obs_history = deque(maxlen=100)
@@ -93,6 +96,9 @@ class LeggedRobot:
             self.ResetPose()
 
         self._robot_raw_obs_history.clear()
+
+        self._SetCollisionFilter()
+
         self._SettleDownForReset(default_motor_angles, reset_time)
         self._pybullet_client.setJointMotorControlArray(self.robotID,
                                                         self._motor_id_list,
@@ -130,6 +136,15 @@ class LeggedRobot:
             self._is_urdf_loaded = True
             self._baseMass = self._pybullet_client.getDynamicsInfo(self.robotID, -1)[0]
 
+    def _SetCollisionFilter(self):
+        for elem in self._disable_link_id_list:
+            for link1, link2 in zip(elem[:-1], elem[1:]):
+                self._pybullet_client.setCollisionFilterPair(bodyUniqueIdA=self.robotID,
+                                                             bodyUniqueIdB=self.robotID,
+                                                             linkIndexA=link1,
+                                                             linkIndexB=link2,
+                                                             enableCollision=0)
+
     def _BuildUrdfIdLists(self):
         self._BuildUrdfName2IdDict()
         self._motor_id_list = [self._joint_name_to_id[joint_name] for joint_name in
@@ -140,14 +155,17 @@ class LeggedRobot:
         self._leg_link_id_list = [self._link_name_to_id[link_name] for link_name in
                                   self._robot_params.sim_names.link_leg_names]
         # self._foot_link_id_list = [(self._link_name_to_id[link_name] for link_name in self._robot_params.sim_names.link_foot_names) if self._robot_params.sim_names.link_foot_names is not None else None]
-        self._foot_link_id_list = [(self._link_name_to_id[link_name] for link_name in
-                                    self._robot_params.sim_names.link_foot_names)
-                                   if self._robot_params.sim_names.link_foot_names is not None else None]
+        self._foot_link_id_list = [self._link_name_to_id[link_name] for link_name in
+                                   self._robot_params.sim_names.link_foot_names]
+        self._single_legs_id_list = [[self._link_name_to_id[link_name] for link_name in elem] for elem in
+                                     self._robot_params.sim_names.link_single_leg_names]
+        self._disable_link_id_list = [[self._link_name_to_id[link_name] for link_name in elem] for elem in
+                                      self._robot_params.sim_names.link_disable_collision_names]
 
     def _BuildUrdfName2IdDict(self):
         num_joints = self._pybullet_client.getNumJoints(self.robotID)
         self._joint_name_to_id = {}
-        self._link_name_to_id = {}
+        self._link_name_to_id = {"base": -1}
         for i in range(num_joints):
             joint_info = self._pybullet_client.getJointInfo(self.robotID, i)
             self._joint_name_to_id[joint_info[1].decode("UTF-8")] = joint_info[0]
@@ -167,34 +185,31 @@ class LeggedRobot:
                                                  angularDamping=0)
 
     def ResetPose(self):
-
-        # for i in range(self._num_motors):
-        #     p.resetJointState(self.robotID,
-        #                       self._motor_id_list[i],
-        #                       (self._init_motor_angles[i] + self._motor_offset[i]) * self._motor_direction[i],
-        #                       targetVelocity=0,
-        #                       physicsClientId=self._pybullet_client)
+        self._pybullet_client.setJointMotorControlArray(bodyUniqueId=self.robotID,
+                                                        jointIndices=self._motor_id_list,
+                                                        controlMode=p.VELOCITY_CONTROL,
+                                                        targetVelocities=[0]*self._num_motors,
+                                                        forces=self._robot_params.joint_torque_MinMax[1])
 
         for i in range(self._num_motors):
-            self._pybullet_client.setJointMotorControl2(
-                self.robotID,
-                self._motor_id_list[i],
-                p.POSITION_CONTROL,
-                targetPosition=(self._init_motor_angles[i] + self._motor_offset[i]) * self._motor_direction[i],
-                force=30,
-                positionGain=0.05,
-                maxVelocity=23
-            )
+            self._pybullet_client.resetJointState(self.robotID,
+                                                  self._motor_id_list[i],
+                                                  (self._init_motor_angles[i] + self._motor_offset[i]) * self._motor_direction[i],
+                                                  targetVelocity=0)
 
-        # self._pybullet_client.setJointMotorControlArray(self.robotID,
-        #                             self._motor_id_list,
-        #                             p.POSITION_CONTROL,
-        #                             targetPositions=(self._init_motor_angles + self._motor_offset) * self._motor_direction,
-        #                             #targetVelocities=[0]*self._num_motors,
-        #                             forces=[20]*self._num_motors)
+        # for i in range(self._num_motors):
+        #     self._pybullet_client.setJointMotorControl2(
+        #         self.robotID,
+        #         self._motor_id_list[i],
+        #         p.POSITION_CONTROL,
+        #         targetPosition=(self._init_motor_angles[i] + self._motor_offset[i]) * self._motor_direction[i],
+        #         force=30,
+        #         positionGain=0.05,
+        #         maxVelocity=23
+        #     )
 
     def _SettleDownForReset(self, default_motor_angles, reset_time):
-        if reset_time <= 0:
+        if reset_time < 0:
             return
 
         for _ in range(100):
@@ -323,11 +338,12 @@ class LeggedRobot:
                                                             self._motor_id_list,
                                                             p.POSITION_CONTROL,
                                                             targetPositions=motor_commands * self._motor_direction,
-                                                            forces=[self._motor.torque_limit] * self._num_motors)
+                                                            forces=self._robot_params.joint_torque_MinMax[1])
 
         elif control_mode is MotorControlMode.TORQUE:
             motor_commands = np.asarray(motor_commands)
-            motor_torqes = np.clip(motor_commands, -1.0 * self._motor.torque_limit, self._motor.torque_limit)
+            motor_torqes = np.clip(motor_commands,
+                                   self._robot_params.joint_torque_MinMax[0], self._robot_params.joint_torque_MinMax[1])
             self._pybullet_client.setJointMotorControlArray(
                 self.robotID,
                 self._motor_id_list,
@@ -348,8 +364,7 @@ class LeggedRobot:
                                                       motor_commands.velocity_desired,
                                                       kps=[motor_commands.kp] * (numBaseDofs + self._num_motors),
                                                       kds=[motor_commands.kd] * (numBaseDofs + self._num_motors),
-                                                      maxForces=[self._motor.torque_limit] * (
-                                                                  numBaseDofs + self._num_motors),
+                                                      forcesLimit=self._robot_params.joint_torque_MinMax,
                                                       timeStep=self._time_step)
                 # tau = self._stablePD.computePD(self.robotID,
                 #                                self._motor_id_list,
@@ -358,7 +373,7 @@ class LeggedRobot:
                 #                                motor_commands.velocity_desired,
                 #                                kps=[motor_commands.kp] * (numBaseDofs + self._num_motors),
                 #                                kds=[motor_commands.kd] * (numBaseDofs + self._num_motors),
-                #                                maxForces=[self._motor.torque_limit] * (numBaseDofs + self._num_motors),
+                #                                forcesLimit=self._robot_params.joint_torque_MinMax,
                 #                                timeStep=self._time_step)
                 motor_torqes = tau[numBaseDofs:]
                 # motor_commands.torque_estimate = motor_torqes
@@ -366,6 +381,45 @@ class LeggedRobot:
             else:
                 motor_torqes = self._motor.hybridCmd_to_torque(motor_commands)
 
+            self._pybullet_client.setJointMotorControlArray(self.robotID,
+                                                            self._motor_id_list,
+                                                            p.TORQUE_CONTROL,
+                                                            forces=motor_torqes * self._motor_direction
+                                                            )
+
+        elif control_mode in [MotorControlMode.HYBRID_COMPUTED_POS, MotorControlMode.HYBRID_COMPUTED_POS_VEL]:
+            q, qdot = self._GetPdObs()
+            numBaseDofs = 0
+            pos_des = []
+            vel_des = []
+            if self._baseMass > 0:
+                numBaseDofs = 6
+                pos_des.extend([None] * 7)
+                vel_des.extend([0] * numBaseDofs)
+            if control_mode is MotorControlMode.HYBRID_COMPUTED_POS:
+                assert len(motor_commands) == self._num_motors
+                pos_des.extend(motor_commands)
+                vel_des.extend([0] * self._num_motors)
+            else:
+                assert len(motor_commands) == self._num_motors * 2
+                pos_des.extend(motor_commands[:self._num_motors])
+                vel_des.extend(motor_commands[self._num_motors:])
+
+            kp = global_values.global_userDebugParams.readValue("kp", 0.353) * 2000
+            kd = global_values.global_userDebugParams.readValue("kd", 0.758) * 50
+            kps = [kp] * (numBaseDofs + self._num_motors)
+            kds = [kd] * (numBaseDofs + self._num_motors)
+            tau = self._stablePD.computeDelayedPD(self.robotID,
+                                                  self._motor_id_list,
+                                                  q,
+                                                  qdot,
+                                                  pos_des,
+                                                  vel_des,
+                                                  kps=kps,
+                                                  kds=kds,
+                                                  forcesLimit=self._robot_params.joint_torque_MinMax,
+                                                  timeStep=self._time_step)
+            motor_torqes = tau[numBaseDofs:]
             self._pybullet_client.setJointMotorControlArray(self.robotID,
                                                             self._motor_id_list,
                                                             p.TORQUE_CONTROL,
@@ -433,10 +487,12 @@ class LeggedRobot:
         return np.asarray(self._robot_raw_obs.appliedJointMotorTorque)
 
     def GetRawBaseOrientation(self):
-        return np.asarray(self._robot_raw_obs.baseOrientation_init)
+        # return np.asarray(self._robot_raw_obs.baseOrientation_init)
+        return np.asarray(self._robot_raw_obs.baseOrientation_world)
 
     def GetRawBaseRPY(self):
-        return np.asarray(self._robot_raw_obs.baseRollPitchYaw_init)
+        # return np.asarray(self._robot_raw_obs.baseRollPitchYaw_init)
+        return np.asarray(self._robot_raw_obs.baseRollPitchYaw_world)
 
     def GetRawBaseRPY_Rate(self):
         return np.asarray(self._robot_raw_obs.baseAngularVelocity_body)
@@ -470,3 +526,6 @@ class LeggedRobot:
 
     def GetNoisyBaseRPY_Rate(self, stdev):
         return AddSensorNoise(self.GetDelayedBaseRPY_Rate(), stdev)
+
+    def GetFootLinkIDs(self):
+        return self._foot_link_id_list

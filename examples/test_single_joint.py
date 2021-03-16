@@ -12,7 +12,7 @@ floor = p.loadURDF("plane_implicit.urdf")
 
 startPos = [0, 0, 0]
 
-button = p.addUserDebugParameter("value", -1, 1, 0)
+button = p.addUserDebugParameter("value", -1, 1, 1)
 
 # 加载urdf文件
 robot = p.loadURDF("/home/wsh/Documents/my_DRL_sim/urdf_files/single_joint_urdf/single_joint.urdf",
@@ -25,7 +25,7 @@ p.changeVisualShape(robot, 0, rgbaColor=[174.0/255.0, 187.0/255.0, 143.0/255.0, 
 
 time_step = 0.001  # 1.0 / 240.0
 p.setTimeStep(time_step)
-p.setJointMotorControl2(robot, 0, p.POSITION_CONTROL, 0, force=10)
+p.setJointMotorControl2(robot, 0, p.POSITION_CONTROL, 0, force=0)
 aa = p.getNumConstraints()
 
 
@@ -78,7 +78,8 @@ while True:
         # p.setJointMotorControl2(robot, 0, p.POSITION_CONTROL, force=0)
         current_val = p.readUserDebugParameter(button)
         current_joint_pos, current_joint_vel = update_obs()
-        hybrid_ctl(current_val, current_joint_pos, current_joint_vel)
+        # hybrid_ctl(current_val, current_joint_pos, current_joint_vel)
+        velocity_ctl(current_val)
 
     p.stepSimulation()
     time.sleep(time_step)

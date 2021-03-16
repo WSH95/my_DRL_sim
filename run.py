@@ -8,6 +8,7 @@ from multiprocessing import Process
 from utilities.debug_curve import DebugCurve
 from utilities import global_values
 import sys
+from tasks.contact_fall_for_legged_robot import is_contact_fall
 
 
 def curve():
@@ -34,7 +35,7 @@ def main():
 
     robot_params = MiniCheetahParams(on_rack=onRack, enable_self_collision=True,
                                      motor_control_mode=MotorControlMode.HYBRID)
-    env = LocomotionGymEnv(gym_config, robot_class, robot_params)
+    env = LocomotionGymEnv(gym_config, robot_class, robot_params, task=None)
     pbClient = env.getClient()
 
     task = TestLeg(pbClient, on_rack=onRack)
@@ -48,6 +49,7 @@ def main():
     while 1:
         H_desired, a = task.bodyHeight2Cmd()
         env.step(a)
+        contact_fall = is_contact_fall(env)
 
         if n % 20 == 0:
             H_obs_cur = env.baseHeight
@@ -60,10 +62,10 @@ def main():
 
         curve_proc_terminate = global_values.global_userDebugParams.readValue("terminate_curve_process", 0)
 
-        if curve_proc_terminate == 1:
+        if curve_proc_terminate == 1 or contact_fall:
             # sys.exit(0)
             curve_drawing_proc.terminate()
-        elif curve_proc_terminate > 1:
+        if curve_proc_terminate > 1:
             sys.exit(0)
 
 

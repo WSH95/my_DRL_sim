@@ -5,7 +5,7 @@ class PDControllerStable(object):
     def __init__(self, pb):
         self._pb = pb
 
-    def computePD(self, bodyUniqueId, jointIndices, motor_direction, desiredPositions, desiredVelocities, kps, kds, maxForces, timeStep):
+    def computePD(self, bodyUniqueId, jointIndices, motor_direction, desiredPositions, desiredVelocities, kps, kds, forcesLimit, timeStep):
         numBaseDofs = 0
         numPosBaseDofs = 0
         baseMass = self._pb.getDynamicsInfo(bodyUniqueId, -1)[0]
@@ -14,12 +14,18 @@ class PDControllerStable(object):
         qdot1 = []
         zeroAccelerations = []
         qError = []
+        forceLimit_min = []
+        forceLimit_max = []
         if baseMass > 0:
             numBaseDofs = 6
             numPosBaseDofs = 7
             q1 = [curPos[0], curPos[1], curPos[2], curOrn[0], curOrn[1], curOrn[2], curOrn[3]]
             qdot1 = [0] * numBaseDofs
             zeroAccelerations = [0] * numBaseDofs
+
+            forceLimit_min = [0] * numBaseDofs
+            forceLimit_max = [0] * numBaseDofs
+
             angDiff = [0, 0, 0]
             for i in range(3):
                 qError.append(0 if desiredPositions[i] is None else (desiredPositions[i] - curPos[i]))
@@ -36,6 +42,10 @@ class PDControllerStable(object):
             q1.append(jointStates[i][0] * motor_direction[i])
             qdot1.append(jointStates[i][1] * motor_direction[i])
             zeroAccelerations.append(0)
+
+        forceLimit_min.extend(forcesLimit[0])
+        forceLimit_max.extend(forcesLimit[1])
+
         q = np.array(q1)
         qdot = np.array(qdot1)
         qdes = np.array(desiredPositions)
@@ -60,13 +70,14 @@ class PDControllerStable(object):
         b = -c + p + d
         qddot = np.linalg.solve(A, b)
         tau = p + d - Kd.dot(qddot) * timeStep
-        maxF = np.array(maxForces)
-        tau = np.clip(tau, -maxF, maxF)
+        minF = np.array(forceLimit_min)
+        maxF = np.array(forceLimit_max)
+        tau = np.clip(tau, minF, maxF)
         # print("c=",c)
         return tau
 
     def computeDelayedPD(self, bodyUniqueId, jointIndices, delayed_q, delayed_qdot, desiredPositions, desiredVelocities,
-                         kps, kds, maxForces, timeStep):
+                         kps, kds, forcesLimit, timeStep):
         numBaseDofs = 0
         numPosBaseDofs = 0
         baseMass = self._pb.getDynamicsInfo(bodyUniqueId, -1)[0]
@@ -75,12 +86,18 @@ class PDControllerStable(object):
         qdot1 = []
         zeroAccelerations = []
         qError = []
+        forceLimit_min = []
+        forceLimit_max = []
         if baseMass > 0:
             numBaseDofs = 6
             numPosBaseDofs = 7
             q1 = [curPos[0], curPos[1], curPos[2], curOrn[0], curOrn[1], curOrn[2], curOrn[3]]
             qdot1 = [0] * numBaseDofs
             zeroAccelerations = [0] * numBaseDofs
+
+            forceLimit_min = [0] * numBaseDofs
+            forceLimit_max = [0] * numBaseDofs
+
             angDiff = [0, 0, 0]
             for i in range(3):
                 qError.append(0 if desiredPositions[i] is None else (desiredPositions[i] - curPos[i]))
@@ -95,6 +112,9 @@ class PDControllerStable(object):
         q1.extend(delayed_q)
         qdot1.extend(delayed_qdot)
         zeroAccelerations.extend([0] * numJoints)
+
+        forceLimit_min.extend(forcesLimit[0])
+        forceLimit_max.extend(forcesLimit[1])
 
         qdot = np.array(qdot1)
         qdotdes = np.array(desiredVelocities)
@@ -115,6 +135,7 @@ class PDControllerStable(object):
         b = -c + p + d
         qddot = np.linalg.solve(A, b)
         tau = p + d - Kd.dot(qddot) * timeStep
-        maxF = np.array(maxForces)
-        tau = np.clip(tau, -maxF, maxF)
+        minF = np.array(forceLimit_min)
+        maxF = np.array(forceLimit_max)
+        tau = np.clip(tau, minF, maxF)
         return tau

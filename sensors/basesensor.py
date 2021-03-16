@@ -21,6 +21,7 @@ class BaseSensor(object):
         self._dtype = dtype
 
         self._robot = None
+        self._observation = None
 
         if isinstance(lower_bound, (float, int)):
             self._lower_bound = np.full(shape, lower_bound, dtype=self._dtype)
@@ -51,7 +52,13 @@ class BaseSensor(object):
         raise NotImplementedError()
 
     def get_observation(self) -> np.ndarray:
-        return np.array(self._get_observation(), dtype=self._dtype)
+        self._observation = np.array(self._get_observation(), dtype=self._dtype)
+        assert len(self._observation) == len(self._lower_bound)
+        assert len(self._observation) == len(self._upper_bound)
+        return self._observation
+
+    def read_current_obs(self):
+        return self._observation
 
     def on_reset(self):
         pass
@@ -59,5 +66,11 @@ class BaseSensor(object):
     def on_step(self):
         pass
 
-    def on_terminate(self):
-        pass
+    def on_terminate(self) -> bool:
+        if False in (self._lower_bound <= self._observation):
+            print("Break the lower bound!")
+            return True
+        if False in (self._observation <= self._upper_bound):
+            print("Break the upper bound!")
+            return True
+        return False
