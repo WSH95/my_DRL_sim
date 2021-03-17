@@ -226,7 +226,7 @@ class LeggedRobot:
 
         for _ in range(100):
             self._pybullet_client.stepSimulation()
-            time.sleep(self._time_step)
+            # time.sleep(self._time_step)
 
         self.ReceiveObservation()
 
@@ -240,7 +240,7 @@ class LeggedRobot:
         for i in range(num_steps_to_reset):
             inter_action = current_motor_position + float(i + 1) * delta_position / num_steps_to_reset
             self._StepInternal(inter_action, MotorControlMode.POSITION)
-            time.sleep(self._time_step)
+            # time.sleep(self._time_step)
 
     def _GetDefaultInitPosition(self):
         if self._reset_at_current_pose and self._robot_raw_obs_history:
