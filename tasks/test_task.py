@@ -32,7 +32,7 @@ class CommandBodyHeight(BaseSensor):
     def _get_observation(self):
         if self._train_or_test == "test":
             self._cmd = global_values.global_userDebugParams.readValue("setBodyHeight", 0.6)
-        elif self._num_update % 1000 == 0:
+        elif self._num_update % 10000 == 0:
             self._cmd = np.random.uniform(-1, 1, 1)
 
         if isinstance(self._cmd, (float, int)):
@@ -77,7 +77,7 @@ class TestTask(BaseTask):
 
     def _calc_reward_base_height(self):
         base_height_curr = self._env.robot.ReadBaseHeight()
-        base_height_desire = BODY_HEIGHT_MIN + self._bodyH_lenth * (1 - np.abs(self._obs_cmd.read_current_obs()[0]))
+        base_height_desire = 0.025 + BODY_HEIGHT_MIN + self._bodyH_lenth * (1 - np.abs(self._obs_cmd.read_current_obs()[0]))
 
         base_height_err = np.abs(base_height_desire - base_height_curr)
 
@@ -110,7 +110,35 @@ class TestTask(BaseTask):
         return base_rotVel_reward
 
     def _calc_reward_breakPosVelBound(self):
-        if self._observation_sensors[0].on_terminate():
-            return -1
-        else:
-            return 0
+        pos_over = 0.0
+        vel_over = 0.0
+        motor_pos_curr = self._env.robot.GetRawMotorAngles()
+        motor_vel_curr = self._env.robot.GetRawMotorVelocities()
+
+        motor_pos_lowerBound = self._env.robot.GetJointAngleLowerBound()
+        motor_pos_upperBound = self._env.robot.GetJointAngleUpperBound()
+        motor_vel_lowerBound = self._env.robot.GetJointVelocityLowerBound()
+        motor_vel_upperBound = self._env.robot.GetJointVelocityUpperBound()
+
+        motor_pos_lowOver = motor_pos_lowerBound - motor_pos_curr
+        motor_pos_upOver = motor_pos_curr - motor_pos_upperBound
+        motor_vel_lowOver = motor_vel_lowerBound - motor_vel_curr
+        motor_vel_upOver = motor_vel_curr - motor_vel_upperBound
+
+        for elem in (motor_pos_lowOver, motor_pos_upOver):
+            pos_over += np.sum(elem[elem > 0])
+
+        for elem in (motor_vel_lowOver, motor_vel_upOver):
+            vel_over += np.sum(elem[elem > 0])
+
+        reward_pos = np.exp(-5 * pos_over) - 1
+        reward_vel = np.exp(-0.1 * vel_over) - 1
+
+        reward = 1 * reward_pos + 1 * reward_vel
+
+        return reward
+
+        # if reward != 0:
+        #     return reward
+        # else:
+        #     return 0

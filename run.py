@@ -34,7 +34,7 @@ def main():
     onRack = False
 
     robot_params = MiniCheetahParams(on_rack=onRack, enable_self_collision=True,
-                                     motor_control_mode=MotorControlMode.HYBRID)
+                                     motor_control_mode=MotorControlMode.HYBRID_COMPUTED_POS_SINGLE)
     env = LocomotionGymEnv(gym_config, robot_class, robot_params, task=None)
     pbClient = env.getClient()
 
