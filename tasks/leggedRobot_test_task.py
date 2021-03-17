@@ -48,7 +48,7 @@ class TestLeg:
         kd = global_values.global_userDebugParams.readValue("kd", 0.758) * 50
         self.action.kp = kp
         self.action.kd = kd
-        return H, self.action
+        return H, np.array([0, 1 * theta1, 1 * theta2])
 
     def singleJointAction(self):
         # e = self._pybullet_client.readUserDebugParameter(self._bodyHeightId)
