@@ -68,9 +68,9 @@ class BaseSensor(object):
 
     def on_terminate(self) -> bool:
         if False in (self._lower_bound <= self._observation):
-            print("Break the lower bound!")
+            # print("Break the lower bound!")
             return True
         if False in (self._observation <= self._upper_bound):
-            print("Break the upper bound!")
+            # print("Break the upper bound!")
             return True
         return False
