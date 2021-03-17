@@ -10,10 +10,12 @@ class QuadrupedRobot(LeggedRobot):
     def __init__(self,
                  pybullet_client,
                  robot_params: RobotSimParams,
-                 time_step: float = 1.0 / 240.0):
+                 time_step: float = 1.0 / 240.0,
+                 num_action_repeat: int = 1):
 
         super(QuadrupedRobot, self).__init__(
             pybullet_client=pybullet_client,
             robot_params=robot_params,
-            time_step=time_step)
+            time_step=time_step,
+            num_action_repeat=num_action_repeat)
 

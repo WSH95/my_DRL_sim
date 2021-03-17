@@ -12,7 +12,7 @@ from envs.set_gui_sliders import set_gui_sliders
 import time
 from tasks.base_task import BaseTask
 from sensors.sensor_wrappers import SensorWrapper
-from tasks.contact_fall_for_legged_robot import is_contact_fall
+from tasks.contact_fall_for_legged_robot import ContactDetection
 
 
 class LocomotionGymEnv(gym.Env):
@@ -37,6 +37,9 @@ class LocomotionGymEnv(gym.Env):
         self._obs_sensor = None
 
         self._time_step = self._gym_config.time_step
+        self._num_action_repeat = self._gym_config.num_action_repeat
+
+        # self._num_bullet_solver_iterations = 12
 
         self._is_render = self._gym_config.enable_rendering and (not self._gym_config.egl_rendering)
         if self._is_render:
@@ -70,7 +73,11 @@ class LocomotionGymEnv(gym.Env):
 
         self.set_gui_sliders()
 
-        self._task.reset(self)
+        if self._task is not None:
+            self._task.reset(self)
+
+        self._contact_fall = ContactDetection(self)
+
         self.reset(start_motor_angles=None, reset_duration=1.0)
 
         self._hard_reset = self._gym_config.enable_hard_reset
@@ -109,6 +116,13 @@ class LocomotionGymEnv(gym.Env):
             #     for action in action_config:
             #         action_upper_bound.append(action.upper_bound)
             #         action_lower_bound.append(action.lower_bound)
+        elif motor_mode == MotorControlMode.HYBRID_COMPUTED_POS_SINGLE:
+            action_lower_bound.extend(self._robot_params.joint_angle_MinMax[0][:3])
+            action_upper_bound.extend(self._robot_params.joint_angle_MinMax[1][:3])
+
+        elif motor_mode == MotorControlMode.HYBRID_COMPUTED_POS_TROT:
+            action_lower_bound.extend(self._robot_params.joint_angle_MinMax[0][:6])
+            action_upper_bound.extend(self._robot_params.joint_angle_MinMax[1][:6])
 
         self.action_space = spaces.Box(np.array(action_lower_bound),
                                        np.array(action_upper_bound),
@@ -139,6 +153,7 @@ class LocomotionGymEnv(gym.Env):
         # Clear the simulation world and rebuild the robot interface.
         if force_hard_reset or self._hard_reset:
             self._pybullet_client.resetSimulation()
+            # self._pybullet_client.setPhysicsEngineParameter(numSolverIterations=self._num_bullet_solver_iterations)
             self._pybullet_client.setTimeStep(self._time_step)
             self._pybullet_client.setGravity(0, 0, -9.8)
 
@@ -148,7 +163,10 @@ class LocomotionGymEnv(gym.Env):
             }
 
             # Rebuild the robot
-            self._robot = self._robot_class(self._pybullet_client, self._robot_params, time_step=self._time_step)
+            self._robot = self._robot_class(self._pybullet_client,
+                                            self._robot_params,
+                                            time_step=self._time_step,
+                                            num_action_repeat=self._num_action_repeat)
 
             if self._obs_sensor is not None:
                 self._obs_sensor.set_robot(self._robot)
@@ -168,6 +186,8 @@ class LocomotionGymEnv(gym.Env):
         if self._obs_sensor is not None:
             self._obs_sensor.on_reset()
 
+        self._contact_fall.reset()
+
         self._num_env_act = 0
 
         return self._get_observation()
@@ -175,13 +195,13 @@ class LocomotionGymEnv(gym.Env):
     def step(self, action):
         time_spent = time.time() - self._last_frame_time
         self._last_frame_time = time.time()
-        # if self._num_env_act % 5 == 0:
+        # if self._num_env_act % 1 == 0:
         #     print(f"time_spent: {time_spent * 1000} ms")
 
         if self._is_render:
             # Sleep, otherwise the computation takes less time than real time,
             # which will make the visualization like a fast-forward video.
-            time_to_sleep = self._time_step - time_spent
+            time_to_sleep = self._time_step * self._num_action_repeat - time_spent
             if time_to_sleep > 0:
                 time.sleep(time_to_sleep)
 
@@ -267,7 +287,7 @@ class LocomotionGymEnv(gym.Env):
         #     if self._obs_sensor.on_terminate():
         #         return True
 
-        if is_contact_fall(self):
+        if self._contact_fall.is_contact_fall():
             return True
 
         if self._task is not None:

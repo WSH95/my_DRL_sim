@@ -10,13 +10,15 @@ import time
 from utilities.pd_controller_stable_custom import PDControllerStable
 from sensors.basesensor import AddSensorNoise
 from utilities import global_values
+from utilities.linear_interpolation import Linear_interpolation
 
 
 class LeggedRobot:
     def __init__(self,
                  pybullet_client,
                  robot_params: RobotSimParams,
-                 time_step: float = 1.0 / 240.0):
+                 time_step: float = 1.0 / 240.0,
+                 num_action_repeat: int = 1):
 
         self._pybullet_client = pybullet_client
         self._robot_params = robot_params
@@ -28,6 +30,7 @@ class LeggedRobot:
         self._init_position = None
         self._init_orientation = None
         self._time_step = time_step
+        self._num_action_repeat = num_action_repeat
         self._motor_control_mode = robot_params.motor_control_mode
         self._init_motor_angles = self._dtype_norm(robot_params.init_motor_angles, "init_motor_angles")
         self._motor_offset = self._dtype_norm(robot_params.motor_offset, "motor_offset")
@@ -57,6 +60,7 @@ class LeggedRobot:
         self._is_urdf_loaded = False
 
         self._num_robot_act = 0
+        self._last_action = None
 
         self.Reset()
 
@@ -99,6 +103,8 @@ class LeggedRobot:
 
         self._SetCollisionFilter()
 
+        self._last_action = None
+
         self._SettleDownForReset(default_motor_angles, reset_time)
         self._pybullet_client.setJointMotorControlArray(self.robotID,
                                                         self._motor_id_list,
@@ -111,12 +117,18 @@ class LeggedRobot:
         if control_mode is None:
             control_mode = self._motor_control_mode
 
-        self._StepInternal(action, control_mode)
+        if isinstance(action, (List, np.ndarray)):
+            inter_actions = Linear_interpolation(self._last_action, action, self._num_action_repeat)
 
-        time_start = time.time()
-        # time.sleep(self._time_step)
-        time_spent = time.time() - time_start
-        self._num_robot_act += 1
+            for a in inter_actions:
+                self._StepInternal(a, control_mode)
+                # time.sleep(self._time_step)
+                self._num_robot_act += 1
+        else:
+            self._StepInternal(action, control_mode)
+            self._num_robot_act += 1
+
+        self._last_action = action
         # if self._num_robot_act % 100 == 0:
         #     print(f"time spent is: {time_spent * 1000} ms.")
 
@@ -384,10 +396,12 @@ class LeggedRobot:
             self._pybullet_client.setJointMotorControlArray(self.robotID,
                                                             self._motor_id_list,
                                                             p.TORQUE_CONTROL,
-                                                            forces=motor_torqes * self._motor_direction
-                                                            )
+                                                            forces=motor_torqes * self._motor_direction)
 
-        elif control_mode in [MotorControlMode.HYBRID_COMPUTED_POS, MotorControlMode.HYBRID_COMPUTED_POS_VEL]:
+        elif control_mode in [MotorControlMode.HYBRID_COMPUTED_POS,
+                              MotorControlMode.HYBRID_COMPUTED_POS_VEL,
+                              MotorControlMode.HYBRID_COMPUTED_POS_SINGLE,
+                              MotorControlMode.HYBRID_COMPUTED_POS_TROT]:
             q, qdot = self._GetPdObs()
             numBaseDofs = 0
             pos_des = []
@@ -396,8 +410,17 @@ class LeggedRobot:
                 numBaseDofs = 6
                 pos_des.extend([None] * 7)
                 vel_des.extend([0] * numBaseDofs)
-            if control_mode is MotorControlMode.HYBRID_COMPUTED_POS:
+            if control_mode is MotorControlMode.HYBRID_COMPUTED_POS_SINGLE:
+                motor_commands = np.tile(motor_commands, 4)
+
+            if control_mode is MotorControlMode.HYBRID_COMPUTED_POS_TROT:
+                motor_commands = np.concatenate((motor_commands, motor_commands[3:], motor_commands[:3]))
+
+            if control_mode in [MotorControlMode.HYBRID_COMPUTED_POS,
+                                MotorControlMode.HYBRID_COMPUTED_POS_SINGLE,
+                                MotorControlMode.HYBRID_COMPUTED_POS_TROT]:
                 assert len(motor_commands) == self._num_motors
+                # motor_commands = 0.85 * motor_commands
                 pos_des.extend(motor_commands)
                 vel_des.extend([0] * self._num_motors)
             else:
@@ -423,12 +446,12 @@ class LeggedRobot:
             self._pybullet_client.setJointMotorControlArray(self.robotID,
                                                             self._motor_id_list,
                                                             p.TORQUE_CONTROL,
-                                                            forces=motor_torqes * self._motor_direction
-                                                            )
+                                                            forces=motor_torqes * self._motor_direction)
 
     def _StepInternal(self, action, motor_control_mode):
         self.ApplyAction(action, motor_control_mode)
         self._pybullet_client.stepSimulation()
+        # time.sleep(0.001)
         self.ReceiveObservation()
 
     def Terminate(self):
@@ -529,3 +552,21 @@ class LeggedRobot:
 
     def GetFootLinkIDs(self):
         return self._foot_link_id_list
+
+    def GetJointAngleLowerBound(self):
+        return np.asarray(self._robot_params.joint_angle_MinMax[0])
+
+    def GetJointAngleUpperBound(self):
+        return np.asarray(self._robot_params.joint_angle_MinMax[1])
+
+    def GetJointVelocityLowerBound(self):
+        return np.asarray(self._robot_params.joint_velocity_MinMax[0])
+
+    def GetJointVelocityUpperBound(self):
+        return np.asarray(self._robot_params.joint_velocity_MinMax[1])
+
+    def GetJointTorqueLowerBound(self):
+        return np.asarray(self._robot_params.joint_torque_MinMax[0])
+
+    def GetJointTorqueUpperBound(self):
+        return np.asarray(self._robot_params.joint_torque_MinMax[1])

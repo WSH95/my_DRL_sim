@@ -36,6 +36,9 @@ class MotorControlMode(enum.Enum):
     HYBRID_COMPUTED_POS = 4
     HYBRID_COMPUTED_POS_VEL = 5
 
+    HYBRID_COMPUTED_POS_SINGLE = 6
+    HYBRID_COMPUTED_POS_TROT = 7
+
 
 # Each hybrid action is a tuple (position, position_gain, velocity,
 # velocity_gain, torque)
