@@ -1,7 +1,9 @@
-import numpy as np
+import os
 from robots.legged_robots.robot_config import *
 
-MINI_CHEETAH_URDF_FILE_PATH = "/home/wsh/Documents/my_DRL_sim/urdf_files/mit_mini_cheetah/mit_mini_cheetah_toes.urdf"
+# MINI_CHEETAH_URDF_FILE_PATH = "/home/wsh/Documents/my_DRL_sim/urdf_files/mit_mini_cheetah/mit_mini_cheetah_toes.urdf"
+MINI_CHEETAH_URDF_FILE_PATH = os.path.join(os.path.dirname(os.path.realpath(__file__)),
+                                           '../../../urdf_files/mit_mini_cheetah/mit_mini_cheetah_toes.urdf')
 MINI_CHEETAH_NUM_MOTORS = 12
 MINI_CHEETAH_DOFS_PER_LEG = 3
 MINI_CHEETAH_NUM_LEGS = 4
