@@ -15,7 +15,14 @@ def env_change_input(time_step,
                      motor_control_mode,
                      train_or_test):
 
-    gym_config = SimulationParameters(time_step=time_step)
+    if train_or_test == 'train':
+        gym_config = SimulationParameters(time_step=time_step)
+    else:
+        gym_config = SimulationParameters(time_step=time_step,
+                                          enable_rendering=True,
+                                          enable_rendering_gui=True,
+                                          egl_rendering=False)
+
     # robotClass = QuadrupedRobot if (robot_class == 'quadruped') else None
     robotClass = robot_class
     robot_params = MiniCheetahParams(on_rack=on_rack,
