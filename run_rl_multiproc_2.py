@@ -1,7 +1,7 @@
 from stable_baselines3 import PPO
 from stable_baselines3.common.env_util import make_vec_env
 from stable_baselines3.common.utils import set_random_seed
-from stable_baselines3.common.vec_env import SubprocVecEnv
+from stable_baselines3.common.vec_env import SubprocVecEnv, DummyVecEnv
 from stable_baselines3.common.vec_env import VecNormalize
 from envs.make_env_for_multiprocessing import env_change_input
 from robots.legged_robots.robot_config import MotorControlMode
@@ -34,7 +34,7 @@ if __name__ == '__main__':
     TIME_STEP = 1. / 1000.
     TEST_OR_TRAIN = "train"
     NUM_CPUS = 8
-    COUNT = 5
+    COUNT = 6
 
     test_or_train = TEST_OR_TRAIN
     assert test_or_train in ["train", "test"]
@@ -63,7 +63,7 @@ if __name__ == '__main__':
         if not (os.path.exists(policy_save_dir)):
             os.makedirs(policy_save_dir)
         model = PPO('MlpPolicy', env, policy_kwargs=policy_kwargs, verbose=1)
-        model.learn(total_timesteps=100000000)
+        model.learn(total_timesteps=40000000)
         model.save(policy_save_path)
         env.save(env_stats_path)
     else:
@@ -75,16 +75,17 @@ if __name__ == '__main__':
         #                        train_or_test=env_params['train_or_test'])
         # env = env_change_input(**env_params)
         env = SubprocVecEnv([lambda: env_change_input(**env_params)])
-        env = VecNormalize.load(env_stats_path, env)
+        env_stats_load_path = os.path.join(policy_save_dir, 'ppo_env_5_18-03-2021_20-38-48.pkl')
+        env = VecNormalize.load(env_stats_load_path, env)
         env.training = False
         env.norm_reward = False
 
-        model_load_path = os.path.join(policy_save_dir, 'ppo_3_17-03-2021_15-39-42')
-        model = PPO.load(policy_save_path, env=env)
+        model_load_path = os.path.join(policy_save_dir, 'ppo_5_18-03-2021_20-38-48.zip')
+        model = PPO.load(model_load_path, env=env)
         obs = env.reset()
         while True:
             action, _state = model.predict(obs, deterministic=True)
             obs, reward, done, info = env.step(action)
-            env.render()
+            # env.render()
             if done:
                 obs = env.reset()
