@@ -12,12 +12,12 @@ def is_contact_fall(env):
         if robot_ground_contact_points:
             for contact_point in robot_ground_contact_points:
                 if contact_point[3] not in foot_links:
-                    print("Ground contact!")
+                    # print("Ground contact!")
                     contact_fall = True
                     break
 
         if robot_self_contact_points:
-            print("Self contact!")
+            # print("Self contact!")
             contact_fall = True
 
     return contact_fall
@@ -45,12 +45,12 @@ class ContactDetection:
             if robot_ground_contact_points:
                 for contact_point in robot_ground_contact_points:
                     if contact_point[3] not in self._foot_links:
-                        print("Ground contact!")
+                        # print("Ground contact!")
                         contact_fall = True
                         break
 
             if robot_self_contact_points:
-                print("Self contact!")
+                # print("Self contact!")
                 contact_fall = True
 
         return contact_fall
