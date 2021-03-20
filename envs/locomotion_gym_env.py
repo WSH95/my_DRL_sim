@@ -205,6 +205,7 @@ class LocomotionGymEnv(gym.Env):
             if time_to_sleep > 0:
                 time.sleep(time_to_sleep)
 
+        action = action * np.asarray(self.action_space.high)
         self._robot.Step(action, None)
 
         if self._obs_sensor is not None:
