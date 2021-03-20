@@ -5,6 +5,7 @@ from robots.legged_robots.leggedRobot import LeggedRobot
 from tasks.leggedRobot_test_task import TestLeg
 from envs.make_env_for_multiprocessing import env_change_input
 from tasks.test2_single_joint_task import TestSingleJointTask
+import os
 
 
 class SingleJointParams(RobotSimParams):
@@ -13,7 +14,8 @@ class SingleJointParams(RobotSimParams):
                  enable_self_collision: bool = True,
                  # time_step: float = 1.0 / 240.0,
                  motor_control_mode: MotorControlMode = MotorControlMode.POSITION):
-        self.urdf_filepath = "/home/wsh/Documents/my_DRL_sim/urdf_files/single_joint_urdf/single_joint.urdf"
+        self.urdf_filepath = os.path.join(os.path.dirname(os.path.realpath(__file__)),
+                                          '../../../urdf_files/single_joint_urdf/single_joint.urdf')
         self.joint_angle_MinMax = [[-np.pi * 2], [np.pi * 2]]
         self.joint_velocity_MinMax = [[-23.5], [23.5]]
         self.joint_torque_MinMax = [[-15], [15]]
