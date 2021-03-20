@@ -19,13 +19,11 @@ class UserDebugParams:
             return
 
     def readValue(self, paramName: str, default_value: float = None):
-        if default_value is not None:
-            return default_value
-
         try:
             paramId = self._paramIds[paramName]
         except KeyError:
-            raise KeyError(f'There is no button named {paramName}')
+            assert default_value is not None
+            return default_value
         else:
             return self._pybullet_client.readUserDebugParameter(paramId)
 

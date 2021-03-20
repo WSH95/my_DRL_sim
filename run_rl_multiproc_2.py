@@ -41,10 +41,10 @@ if __name__ == '__main__':
     ROBOT = 'SingleJoint'
     assert ROBOT in ['SingleJoint', 'WholeBody']
     TIME_STEP = 1. / 1000.
-    # TEST_OR_TRAIN = "train"
-    TEST_OR_TRAIN = "test"
+    TEST_OR_TRAIN = "train"
+    # TEST_OR_TRAIN = "test"
     NUM_CPUS = 7
-    COUNT = 18
+    COUNT = 1
 
     test_or_train = TEST_OR_TRAIN
     assert test_or_train in ["train", "test"]
@@ -70,10 +70,10 @@ if __name__ == '__main__':
     env_stats_path: str = ''
 
     if TEST_OR_TRAIN == "train":
-        policy_save_filename = 'ppo_' + str(COUNT) + '_S_PV_4096_70w_' + curr_time + '.zip'
+        policy_save_filename = 'ppo_model_' + str(COUNT) + '_S_PV_4096_700w_' + curr_time + '.zip'
         policy_save_path = os.path.join(policy_save_dir, policy_save_filename)
 
-        env_stats_filename = 'ppo_env_' + str(COUNT) + '_S_PV_4096_70w_' + curr_time + '.pkl'
+        env_stats_filename = 'ppo_env_' + str(COUNT) + '_S_PV_4096_700w_' + curr_time + '.pkl'
         env_stats_path = os.path.join(policy_save_dir, env_stats_filename)
 
         # env = make_vec_env(env_change_input, n_envs=NUM_CPUS, seed=0, env_kwargs=env_params, vec_env_cls=None)
@@ -82,9 +82,9 @@ if __name__ == '__main__':
         if not (os.path.exists(policy_save_dir)):
             os.makedirs(policy_save_dir)
         model = PPO('MlpPolicy', env, policy_kwargs=policy_kwargs, verbose=1)
-        model.set_parameters(os.path.join(policy_save_dir, 'ppo_17_S_PV_4096_4000w_20-03-2021_07-20-24.zip'))
+        # model.set_parameters(os.path.join(policy_save_dir, 'ppo_17_S_PV_4096_4000w_20-03-2021_07-20-24.zip'))
         t1 = time.time()
-        model.learn(total_timesteps=700000)
+        model.learn(total_timesteps=7000000)
         print(f"The training spent {time.time() - t1} s.")
         model.save(policy_save_path)
         env.save(env_stats_path)
@@ -98,12 +98,12 @@ if __name__ == '__main__':
         # env = env_change_input(**env_params)
 
         env = SubprocVecEnv([lambda: env_change_input(**env_params)])
-        env_stats_load_path = os.path.join(policy_save_dir, 'ppo_env_18_S_PV_4096_70w_20-03-2021_21-40-34.pkl')
+        env_stats_load_path = os.path.join(policy_save_dir, 'ppo_env_1_S_PV_0.6_10w_20-03-2021_22-07-27.pkl')
         env = VecNormalize.load(env_stats_load_path, env)
         env.training = False
         env.norm_reward = False
 
-        model_load_path = os.path.join(policy_save_dir, 'ppo_18_S_PV_4096_70w_20-03-2021_21-40-34.zip')
+        model_load_path = os.path.join(policy_save_dir, 'ppo_1_S_PV_0.6_10w_20-03-2021_22-07-27.zip')
         model = PPO.load(model_load_path, env=env)
         obs = env.reset()
         while True:
