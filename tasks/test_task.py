@@ -31,7 +31,7 @@ class CommandBodyHeight(BaseSensor):
 
     def _get_observation(self):
         if self._train_or_test == "test":
-            self._cmd = global_values.global_userDebugParams.readValue("setBodyHeight", 0.6)
+            self._cmd = global_values.global_userDebugParams.readValue("setBodyHeight")
         elif self._num_update % 4096 == 0:
             self._cmd = np.random.uniform(-1, 1, 1)
             # self._cmd = 0.6

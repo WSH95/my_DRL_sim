@@ -41,8 +41,8 @@ if __name__ == '__main__':
     ROBOT = 'SingleJoint'
     assert ROBOT in ['SingleJoint', 'WholeBody']
     TIME_STEP = 1. / 1000.
-    TEST_OR_TRAIN = "train"
-    # TEST_OR_TRAIN = "test"
+    # TEST_OR_TRAIN = "train"
+    TEST_OR_TRAIN = "test"
     NUM_CPUS = 7
     COUNT = 18
 
@@ -98,12 +98,12 @@ if __name__ == '__main__':
         # env = env_change_input(**env_params)
 
         env = SubprocVecEnv([lambda: env_change_input(**env_params)])
-        env_stats_load_path = os.path.join(policy_save_dir, 'ppo_env_17_S_PV_4096_4000w_20-03-2021_07-20-24.pkl')
+        env_stats_load_path = os.path.join(policy_save_dir, 'ppo_env_18_S_PV_4096_70w_20-03-2021_21-40-34.pkl')
         env = VecNormalize.load(env_stats_load_path, env)
         env.training = False
         env.norm_reward = False
 
-        model_load_path = os.path.join(policy_save_dir, 'ppo_17_S_PV_4096_4000w_20-03-2021_07-20-24.zip')
+        model_load_path = os.path.join(policy_save_dir, 'ppo_18_S_PV_4096_70w_20-03-2021_21-40-34.zip')
         model = PPO.load(model_load_path, env=env)
         obs = env.reset()
         while True:
