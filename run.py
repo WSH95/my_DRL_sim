@@ -29,12 +29,15 @@ def curve():
 
 def main():
     time_step = 1. / 1000.
-    gym_config = SimulationParameters(time_step=time_step)
+    gym_config = SimulationParameters(time_step=time_step,
+                                      enable_rendering=True,
+                                      enable_rendering_gui=True,
+                                      egl_rendering=False)
     robot_class = QuadrupedRobot
     onRack = False
 
     robot_params = MiniCheetahParams(on_rack=onRack, enable_self_collision=True,
-                                     motor_control_mode=MotorControlMode.HYBRID_COMPUTED_POS_SINGLE)
+                                     motor_control_mode=MotorControlMode.HYBRID_COMPUTED_POS_VEL)
     env = LocomotionGymEnv(gym_config, robot_class, robot_params, task=None)
     pbClient = env.getClient()
 

@@ -32,8 +32,10 @@ class CommandBodyHeight(BaseSensor):
     def _get_observation(self):
         if self._train_or_test == "test":
             self._cmd = global_values.global_userDebugParams.readValue("setBodyHeight", 0.6)
-        elif self._num_update % 10000 == 0:
+        elif self._num_update % 4096 == 0:
             self._cmd = np.random.uniform(-1, 1, 1)
+            # self._cmd = 0.6
+            # print(f"command: {self._cmd}")
 
         if isinstance(self._cmd, (float, int)):
             self._cmd = np.array([self._cmd])
@@ -134,7 +136,7 @@ class TestTask(BaseTask):
         reward_pos = np.exp(-5 * pos_over) - 1
         reward_vel = np.exp(-0.1 * vel_over) - 1
 
-        reward = 1 * reward_pos + 1 * reward_vel
+        reward = 1 * reward_pos  # + 1 * reward_vel
 
         return reward
 

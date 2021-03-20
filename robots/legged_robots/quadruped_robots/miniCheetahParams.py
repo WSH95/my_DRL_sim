@@ -211,4 +211,4 @@ class MiniCheetahParams(RobotSimParams):
 
         self.reset_at_current_pose = False
         self.control_latency = 0.0
-        self.pd_latency = 0.0
+        self.pd_latency = 0.00

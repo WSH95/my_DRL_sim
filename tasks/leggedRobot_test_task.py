@@ -48,13 +48,14 @@ class TestLeg:
         kd = global_values.global_userDebugParams.readValue("kd", 0.758) * 50
         self.action.kp = kp
         self.action.kd = kd
-        return H, np.array([0, 1 * theta1, 1 * theta2])
+        return H, np.array([0, 1 * theta1, 1 * theta2] * 4 + [0] * 12) / (2 * np.pi)
 
     def singleJointAction(self):
         # e = self._pybullet_client.readUserDebugParameter(self._bodyHeightId)
-        e = global_values.global_userDebugParams.readValue("setBodyHeight", 0.6)
+        e = global_values.global_userDebugParams.readValue("setBodyHeight")
         tor = None
-        pos = np.array([e * 2 * np.pi])
+        # pos = np.array([e * 2 * np.pi])
+        pos = np.array([e])
         vel = np.array([0])
         kp = 0.8
         kd = 0.05
@@ -64,4 +65,5 @@ class TestLeg:
         self.action.kp = kp
         self.action.kd = kd
 
-        return self.action
+        return np.concatenate((self.action.position_desired, self.action.velocity_desired))
+        # return self.action.position_desired

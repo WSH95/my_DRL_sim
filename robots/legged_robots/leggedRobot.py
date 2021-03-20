@@ -50,6 +50,7 @@ class LeggedRobot:
 
         self._robot_raw_obs = RobotRawObservation()
         self._robot_raw_obs_history = deque(maxlen=100)
+        self._joint_angle_history = deque(maxlen=100)
         self._control_obs = None
 
         self._reset_at_current_pose = (not self._on_rack) and robot_params.reset_at_current_pose
@@ -100,8 +101,11 @@ class LeggedRobot:
             self.ResetPose()
 
         self._robot_raw_obs_history.clear()
+        self._joint_angle_history.clear()
 
         self._SetCollisionFilter()
+
+        # self._EnableToequeSensor()
 
         self._last_action = None
 
@@ -156,6 +160,12 @@ class LeggedRobot:
                                                              linkIndexA=link1,
                                                              linkIndexB=link2,
                                                              enableCollision=0)
+
+    def _EnableToequeSensor(self):
+        for elem in self._motor_id_list:
+            self._pybullet_client.enableJointForceTorqueSensor(self.robotID,
+                                                               elem,
+                                                               enableSensor=True)
 
     def _BuildUrdfIdLists(self):
         self._BuildUrdfName2IdDict()
@@ -262,7 +272,7 @@ class LeggedRobot:
         joint_states = self._pybullet_client.getJointStates(self.robotID, self._motor_id_list)
         jointPosition = [state[0] for state in joint_states]
         jointVelocity = [state[1] for state in joint_states]
-        appliedJointMotorTorque = [state[3] for state in joint_states]
+        appliedJointMotorTorque = [state[2][5] / 2 for state in joint_states]
         self._robot_raw_obs.jointPosition = np.multiply(jointPosition, self._motor_direction)
         self._robot_raw_obs.jointVelocity = np.multiply(jointVelocity, self._motor_direction)
         self._robot_raw_obs.appliedJointMotorTorque = np.multiply(appliedJointMotorTorque, self._motor_direction)
@@ -310,6 +320,7 @@ class LeggedRobot:
         self._robot_raw_obs.baseRollPitchYaw_init = p.getEulerFromQuaternion(self._robot_raw_obs.baseOrientation_init)
         """ -------------------------------------- """
 
+        self._joint_angle_history.appendleft(self._robot_raw_obs.jointPosition)
         self._robot_raw_obs_history.appendleft(self.GetRobotRawObs())
         self._control_obs = self._GetControlObs()
 
@@ -428,8 +439,10 @@ class LeggedRobot:
                 pos_des.extend(motor_commands[:self._num_motors])
                 vel_des.extend(motor_commands[self._num_motors:])
 
-            kp = global_values.global_userDebugParams.readValue("kp", 0.353) * 2000
-            kd = global_values.global_userDebugParams.readValue("kd", 0.758) * 50
+            # kp = global_values.global_userDebugParams.readValue("kp", 0.68) * 100
+            # kd = global_values.global_userDebugParams.readValue("kd", 0.47) * 2
+            kp = global_values.global_userDebugParams.readValue("kp", 0.37) * 1
+            kd = global_values.global_userDebugParams.readValue("kd", 0.315) * 0.1
             kps = [kp] * (numBaseDofs + self._num_motors)
             kds = [kd] * (numBaseDofs + self._num_motors)
             tau = self._stablePD.computeDelayedPD(self.robotID,
@@ -504,6 +517,15 @@ class LeggedRobot:
         return np.asarray(self._robot_raw_obs.jointPosition)
 
     def GetRawMotorVelocities(self):
+        # his_len = len(self._joint_angle_history)
+        # assert his_len > 0
+        # if his_len == 1:
+        #     return np.asarray(self._robot_raw_obs.jointVelocity)
+        # elif 2 <= his_len <= 2:
+        #     return np.asarray((self._joint_angle_history[-1] - self._joint_angle_history[0]) / ((his_len - 1) * self._time_step))
+        # else:
+        #     return np.asarray((self._joint_angle_history[1] - self._joint_angle_history[0]) / (1 * self._time_step))
+
         return np.asarray(self._robot_raw_obs.jointVelocity)
 
     def GetRawMotorTorques(self):
