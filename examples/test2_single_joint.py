@@ -15,7 +15,7 @@ class SingleJointParams(RobotSimParams):
                  # time_step: float = 1.0 / 240.0,
                  motor_control_mode: MotorControlMode = MotorControlMode.POSITION):
         self.urdf_filepath = os.path.join(os.path.dirname(os.path.realpath(__file__)),
-                                          '../../../urdf_files/single_joint_urdf/single_joint.urdf')
+                                          '../urdf_files/single_joint_urdf/single_joint.urdf')
         self.joint_angle_MinMax = [[-np.pi * 2], [np.pi * 2]]
         self.joint_velocity_MinMax = [[-23.5], [23.5]]
         self.joint_torque_MinMax = [[-15], [15]]

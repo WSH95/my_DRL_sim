@@ -74,7 +74,7 @@ class LeggedRobot:
         else:
             return np.full(self._num_motors, data)
 
-    def Reset(self, reload_urdf=True, default_motor_angles=None, reset_time=3.0):
+    def Reset(self, reload_urdf=True, default_motor_angles=None, reset_time=0.002):
         self._init_position = self._GetDefaultInitPosition()
         self._init_orientation = self._GetDefaultInitOrientation()
         if reload_urdf:
@@ -445,6 +445,13 @@ class LeggedRobot:
             kd = global_values.global_userDebugParams.readValue("kd", 0.315) * 0.1
             kps = [kp] * (numBaseDofs + self._num_motors)
             kds = [kd] * (numBaseDofs + self._num_motors)
+
+            # q, qdot = self._GetPdObs()
+            # pos_des = motor_commands[:self._num_motors]
+            # vel_des = motor_commands[self._num_motors:]
+            # kps = [0.37]
+            # kds = [0.0315]
+
             tau = self._stablePD.computeDelayedPD(self.robotID,
                                                   self._motor_id_list,
                                                   q,
@@ -456,6 +463,7 @@ class LeggedRobot:
                                                   forcesLimit=self._robot_params.joint_torque_MinMax,
                                                   timeStep=self._time_step)
             motor_torqes = tau[numBaseDofs:]
+            # motor_torqes = np.asarray(kps) * (np.asarray(pos_des) - np.asarray(q)) + np.asarray(kds) * (np.asarray(vel_des) - np.asarray(qdot))
             self._pybullet_client.setJointMotorControlArray(self.robotID,
                                                             self._motor_id_list,
                                                             p.TORQUE_CONTROL,

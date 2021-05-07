@@ -10,9 +10,9 @@ class SimulationParameters(object):
     camera_pitch = attr.ib(type=float, default=-30)
     render_width = attr.ib(type=int, default=480)
     render_height = attr.ib(type=int, default=360)
-    egl_rendering = attr.ib(type=bool, default=True)  # enable hardware accelerated OpenGL rendering without a X11 context
+    egl_rendering = attr.ib(type=bool, default=False)  # enable hardware accelerated OpenGL rendering without a X11 context
     enable_hard_reset = attr.ib(type=bool, default=False)
-    reset_time = attr.ib(type=float, default=-1)
+    reset_time = attr.ib(type=float, default=0.002)
     time_step = attr.ib(type=float, default=1.0 / 240.0)
     num_action_repeat = attr.ib(type=int, default=1)
     train_or_test = attr.ib(type=str, default="train")

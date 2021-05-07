@@ -73,12 +73,13 @@ class LocomotionGymEnv(gym.Env):
 
         self.set_gui_sliders()
 
-        if self._task is not None:
-            self._task.reset(self)
-
         self._contact_fall = ContactDetection(self)
 
-        self.reset(start_motor_angles=None, reset_duration=1.0)
+        self._reset_time = self._gym_config.reset_time
+        self.reset(start_motor_angles=None, reset_duration=self._reset_time)
+
+        if self._task is not None:
+            self._task.reset(self)
 
         self._hard_reset = self._gym_config.enable_hard_reset
 
@@ -143,7 +144,7 @@ class LocomotionGymEnv(gym.Env):
 
     def reset(self,
               start_motor_angles=None,
-              reset_duration=0.0,
+              reset_duration=0.002,
               reset_visualization_camera=True,
               force_hard_reset=False
               ):
@@ -205,7 +206,7 @@ class LocomotionGymEnv(gym.Env):
             if time_to_sleep > 0:
                 time.sleep(time_to_sleep)
 
-        action = action * np.asarray(self.action_space.high)
+        # action = action * np.asarray(self.action_space.high)
         self._robot.Step(action, None)
 
         if self._obs_sensor is not None:
